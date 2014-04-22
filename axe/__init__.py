@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import inspect
+from functools import wraps
 from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException
 from werkzeug.routing import Map, Rule
 
-def get_ext(name, app, request=None):
-    return app.exts[name](request)
+from .errors import (
+    DuplicatedExtension,
+)
 
 def query(request):
     return request.args
@@ -19,7 +21,7 @@ class Axe(object):
 
     def __init__(self):
         self.urls = {}
-        self.exts = self.__class__.DEFAULT_EXTS
+        self.exts = dict(self.__class__.DEFAULT_EXTS)
         self.views = Map()
 
     def build(self, urls):
@@ -28,13 +30,23 @@ class Axe(object):
             rule = Rule(key, methods=('GET', ), endpoint=key)
             self.views.add(rule)
 
+    def get_ext(self, name, request=None):
+        return self.exts[name](request)
+
+    def register_ext(self, func):
+        func_name = func.__name__
+        if func_name in self.exts:
+            raise DuplicatedExtension
+        self.exts[func_name] = func
+        return func
+
     def get_view(self, endpoint):
         return self.urls[endpoint]
 
     def get_view_args(self, view, request):
         arg_spec = inspect.getargspec(view)
         return {
-            name: get_ext(name, self, request)
+            name: self.get_ext(name, request)
             for name in arg_spec.args
         }
 
