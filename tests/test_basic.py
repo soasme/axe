@@ -18,3 +18,6 @@ def test_get_hello(client):
 
 def test_get_hello_with_query(client):
     assert client.get('/hello?name=ainesmile').data == 'Hello World: ainesmile'
+
+def test_get_404(client):
+    assert client.get('/404').status_code == 404
