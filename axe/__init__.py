@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import inspect
-from functools import wraps
 from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException
 from werkzeug.routing import Map, Rule
@@ -27,7 +26,7 @@ class Axe(object):
     def build(self, urls):
         self.urls = urls
         for key in urls:
-            rule = Rule(key, methods=('GET', ), endpoint=key)
+            rule = Rule(key, endpoint=key)
             self.views.add(rule)
 
     def get_ext(self, name, request=None):
