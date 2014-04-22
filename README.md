@@ -10,7 +10,7 @@ Axe is an extremely extendable web framework for Python based on `Werkzeug`. It 
 * IoC
 
 Unlike Flask, there is no **Thread-Local** viriable like `flask.request`, `flask.g`.
-All variable are injected into view function through function name.
+All variable are injected into view function through function name inspired by `py.test fixture`.
 
 * Concurrent
 
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
 Run All tests:
 
-    $ make test
+    $ tox
 
 Run single case:
 
