@@ -11,7 +11,7 @@ def get_ext(name, app, request=None):
 def query(request):
     return request.args
 
-class Taxe(object):
+class Axe(object):
 
     DEFAULT_EXTS = {
         'query': query

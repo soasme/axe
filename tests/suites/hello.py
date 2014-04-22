@@ -6,8 +6,8 @@ def index():
 def hello(query):
     return 'Hello World: %s' % query.get('name', '[Anon]')
 
-from taxe import Taxe
-app = Taxe()
+from axe import Axe
+app = Axe()
 app.build({
     '/': index,
     '/hello': hello,
