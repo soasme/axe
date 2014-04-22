@@ -3,8 +3,7 @@
 def index():
     return 'Index'
 
-def hello():
-    query = {}
+def hello(query):
     return 'Hello World: %s' % query.get('name', '[Anon]')
 
 from taxe import Taxe

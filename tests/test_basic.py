@@ -14,4 +14,7 @@ def test_get_index(client):
     assert client.get('/').data == 'Index'
 
 def test_get_hello(client):
-    return client.get('/hello').data == 'Hello World: '
+    assert client.get('/hello').data == 'Hello World: [Anon]'
+
+def test_get_hello_with_query(client):
+    assert client.get('/hello?name=ainesmile').data == 'Hello World: ainesmile'
