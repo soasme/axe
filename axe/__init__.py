@@ -28,25 +28,27 @@ class Axe(object):
             rule = Rule(key, methods=('GET', ), endpoint=key)
             self.views.add(rule)
 
+    def get_view(self, endpoint):
+        return self.urls[endpoint]
+
+    def get_view_args(self, view, request):
+        arg_spec = inspect.getargspec(view)
+        return {
+            name: get_ext(name, self, request)
+            for name in arg_spec.args
+        }
+
+    def gen_response(self, request):
+        adapter = self.views.bind_to_environ(request.environ)
+        endpoint, values = adapter.match()
+        view = self.get_view(endpoint)
+        args = self.get_view_args(view, request)
+        resp = view(**args)
+        return Response(resp)
+
     @Request.application
     def __call__(self, request):
-        adapter = self.views.bind_to_environ(request.environ)
         try:
-            endpoint, values = adapter.match()
-            view = self.urls[endpoint]
-            arg_spec = inspect.getargspec(view)
-            values = {
-                name: get_ext(name, self, request)
-                for name in arg_spec.args
-            }
-            resp = view(**values)
-            return Response(resp)
-        except HTTPException, e:
+            return self.gen_response(request)
+        except HTTPException as e:
             return e
-
-
-
-if __name__ == '__main__':
-    from werkzeug.serving import run_simple
-    application = Taxe()
-    run_simple('localhost', 4000, application)
