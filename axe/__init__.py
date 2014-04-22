@@ -9,14 +9,22 @@ from .errors import (
     DuplicatedExtension,
 )
 from .default_exts import (
-    query,
+    get_query,
+    get_form,
+    get_json,
+    get_headers,
+    get_request,
 )
 
 
 class Axe(object):
 
     DEFAULT_EXTS = {
-        'query': query
+        'query': get_query,
+        'form': get_form,
+        'json': get_json,
+        'header': get_headers,
+        'request': get_request,
     }
 
     def __init__(self):
@@ -33,7 +41,7 @@ class Axe(object):
     def get_ext(self, name, request=None):
         return self.exts[name](request)
 
-    def register_ext(self, func):
+    def ext(self, func):
         func_name = func.__name__
         if func_name in self.exts:
             raise DuplicatedExtension

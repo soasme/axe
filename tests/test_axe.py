@@ -14,13 +14,13 @@ def test_build_from_urls(axe):
     assert axe.urls['/'] == func
 
 def test_register_ext_success(axe):
-    @axe.register_ext
+    @axe.ext
     def test(request):
         pass
     assert axe.exts['test'] == test
 
 def test_register_ext_duplicated(axe):
     with pytest.raises(errors.DuplicatedExtension):
-        @axe.register_ext
+        @axe.ext
         def query(request):
             pass
