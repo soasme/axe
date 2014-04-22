@@ -8,9 +8,10 @@ from werkzeug.routing import Map, Rule
 from .errors import (
     DuplicatedExtension,
 )
+from .default_exts import (
+    query,
+)
 
-def query(request):
-    return request.args
 
 class Axe(object):
 
