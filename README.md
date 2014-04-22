@@ -9,7 +9,7 @@ Axe is an extremely extendable web framework for Python based on `Werkzeug`. It 
 
 Run All tests:
 
-    $ py.test tests
+    $ make test
 
 Run single case:
 
