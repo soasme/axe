@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from functools import wraps
 import inspect
 from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException
@@ -29,7 +28,8 @@ class Taxe(object):
             rule = Rule(key, methods=('GET', ), endpoint=key)
             self.views.add(rule)
 
-    def dispatch_request(self, request):
+    @Request.application
+    def __call__(self, request):
         adapter = self.views.bind_to_environ(request.environ)
         try:
             endpoint, values = adapter.match()
@@ -44,13 +44,7 @@ class Taxe(object):
         except HTTPException, e:
             return e
 
-    def wsgi_app(self, environ, start_response):
-        request = Request(environ)
-        response = self.dispatch_request(request)
-        return response(environ, start_response)
 
-    def __call__(self, environ, start_response):
-        return self.wsgi_app(environ, start_response)
 
 if __name__ == '__main__':
     from werkzeug.serving import run_simple
