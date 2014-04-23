@@ -23,7 +23,7 @@ class Axe(object):
         'query': get_query,
         'form': get_form,
         'json': get_json,
-        'header': get_headers,
+        'headers': get_headers,
         'request': get_request,
     }
 

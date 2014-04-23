@@ -15,7 +15,8 @@ def get_json(request):
     content_type = request.headers.get('Content-Type')
     if content_type != 'application/json':
         return
-    return json.loads(request.body)
+    data = request.data.decode('utf8')
+    return json.loads(data)
 
 def get_headers(request):
     return request.headers
