@@ -4,6 +4,8 @@ import inspect
 from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException
 from werkzeug.routing import Map, Rule
+from werkzeug.test import Client
+from werkzeug.wrappers import BaseResponse
 
 from .errors import (
     DuplicatedExtension,
@@ -72,3 +74,7 @@ class Axe(object):
             return self.gen_response(request)
         except HTTPException as e:
             return e
+
+    @property
+    def client(self):
+        return Client(self, BaseResponse)

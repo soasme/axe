@@ -1,23 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import pytest
-
 from .suites.hello import app
-from werkzeug.test import Client
-from werkzeug.wrappers import BaseResponse
 
-@pytest.fixture
-def client():
-    return Client(app, BaseResponse)
+def test_get_index():
+    assert app.client.get('/').data == b'Index'
 
-def test_get_index(client):
-    assert client.get('/').data == b'Index'
+def test_get_hello():
+    assert app.client.get('/hello').data == b'Hello World: [Anon]'
 
-def test_get_hello(client):
-    assert client.get('/hello').data == b'Hello World: [Anon]'
+def test_get_hello_with_query():
+    assert app.client.get('/hello?name=ainesmile').data == b'Hello World: ainesmile'
 
-def test_get_hello_with_query(client):
-    assert client.get('/hello?name=ainesmile').data == b'Hello World: ainesmile'
-
-def test_get_404(client):
-    assert client.get('/404').status_code == 404
+def test_get_404():
+    assert app.client.get('/404').status_code == 404
