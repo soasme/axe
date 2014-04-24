@@ -9,6 +9,7 @@ from werkzeug.wrappers import Request, Response
 
 from .errors import (
     DuplicatedExtension,
+    UnrecognizedExtension,
 )
 from .default_exts import (
     get_query,
@@ -37,10 +38,19 @@ class Axe(object):
         self.urls = urls
         for key in urls:
             rule = Rule(key, endpoint=key)
+            arg_spec = inspect.getargspec(urls[key])
+            for ext in arg_spec.args:
+                self.get_ext(ext)
             self.views.add(rule)
 
-    def get_ext(self, name, request=None):
-        return self.exts[name](request)
+    def get_ext(self, name):
+        try:
+            return self.exts[name]
+        except KeyError:
+            raise UnrecognizedExtension(name)
+
+    def get_ext_value(self, name, request=None):
+        return self.get_ext(name)(request)
 
     def ext(self, func):
         func_name = func.__name__
@@ -55,7 +65,7 @@ class Axe(object):
     def get_view_args(self, view, request):
         arg_spec = inspect.getargspec(view)
         return {
-            name: self.get_ext(name, request)
+            name: self.get_ext_value(name, request)
             for name in arg_spec.args
         }
 

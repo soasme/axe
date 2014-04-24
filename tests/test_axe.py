@@ -24,3 +24,7 @@ def test_register_ext_duplicated(axe):
         @axe.ext
         def query(request):
             pass
+
+def test_unrecognized_ext(axe):
+    with pytest.raises(errors.UnrecognizedExtension):
+        axe.build({'/': lambda unrecognized_ext: ''})
