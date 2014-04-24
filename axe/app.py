@@ -4,7 +4,6 @@ import inspect
 
 from werkzeug.exceptions import HTTPException
 from werkzeug.routing import Map, Rule
-from werkzeug.test import Client
 from werkzeug.wrappers import Request, Response
 
 from .errors import (
@@ -86,4 +85,9 @@ class Axe(object):
 
     @property
     def client(self):
+        from werkzeug.test import Client
         return Client(self, Response)
+
+    def run_simple(self, host='127.0.0.1', port='8384'):
+        from werkzeug.serving import run_simple
+        run_simple(host, port, self)
