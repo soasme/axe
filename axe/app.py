@@ -32,6 +32,7 @@ class Axe(object):
         self.urls = {}
         self.exts = dict(self.__class__.DEFAULT_EXTS)
         self.views = Map()
+        self._wsgi_app = self.wsgi_app
 
     def build(self, urls):
         self.urls = urls
@@ -77,11 +78,15 @@ class Axe(object):
         return Response(resp)
 
     @Request.application
-    def __call__(self, request):
+    def wsgi_app(self, request):
         try:
             return self.gen_response(request)
         except HTTPException as e:
             return e
+
+    def __call__(self, env, start_response):
+        app = self._wsgi_app
+        return app(env, start_response)
 
     @property
     def client(self):
@@ -91,3 +96,15 @@ class Axe(object):
     def run_simple(self, host='127.0.0.1', port='8384', **options):
         from werkzeug.serving import run_simple
         run_simple(host, port, self, **options)
+
+    def add_static_folder(self, route, path):
+        from werkzeug.wsgi import SharedDataMiddleware
+        self._wsgi_app = SharedDataMiddleware(self._wsgi_app, {
+            route: path
+        })
+
+    def add_route_dispatcher(self, route, wsgi_app):
+        from werkzeug.wsgi import DispatcherMiddleware
+        self._wsgi_app = DispatcherMiddleware(self._wsgi_app, {
+            route: wsgi_app
+        })
