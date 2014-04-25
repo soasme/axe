@@ -88,6 +88,6 @@ class Axe(object):
         from werkzeug.test import Client
         return Client(self, Response)
 
-    def run_simple(self, host='127.0.0.1', port='8384'):
+    def run_simple(self, host='127.0.0.1', port='8384', **options):
         from werkzeug.serving import run_simple
-        run_simple(host, port, self)
+        run_simple(host, port, self, **options)
