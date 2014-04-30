@@ -74,8 +74,8 @@ headers or any other specific of you project. But it's hard to debug if you
 attach too much values in one `request` object. Here is the solution of `Axe`:
 DI(Dependency Injection). List all the dependencies as parameter in controller
 function, and happy to use them. We call these dependencies as extension in `Axe`.
-There are several default extensions like `query`, `json`, `form`, `headers`, `request`.
-But `Axe` enable you to write your own extensions.
+There are several default extensions like `query`, `json`, `form`, `headers`,
+`request`, `method`.  But `Axe` enable you to write your own extensions.
 
 Query
 `````
@@ -88,9 +88,21 @@ like `/hello?name=world`. Default value is `{}`.
 
     app.build({'/hello': hello})
 
+Form
+````
+
+`form` parameter is a `dict` object that coming from form submitted from front.
+Default value is `{}`.
+
 JSON
 ````
 
-`json` paramter is a `dict` object also only if there is request header
+`json` parameter is a `dict` object also only if there is request header
 `Content-Type: application/json` with request body in legal JSON encoding.
 Default value is `{}`.
+
+Method
+``````
+
+`method` parameter is a string in (`GET`, `POST`, `DELETE`, `PUT`,
+`OPTIONS`, `HEAD`).
