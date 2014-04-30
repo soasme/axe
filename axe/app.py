@@ -15,6 +15,7 @@ from .default_exts import (
     get_form,
     get_json,
     get_headers,
+    get_method,
     get_request,
 )
 
@@ -25,6 +26,7 @@ class Axe(object):
         'form': get_form,
         'json': get_json,
         'headers': get_headers,
+        'method': get_method,
         'request': get_request,
     }
 

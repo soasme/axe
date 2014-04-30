@@ -20,3 +20,6 @@ def get_json(request):
 
 def get_headers(request):
     return request.headers
+
+def get_method(request):
+    return request.method
