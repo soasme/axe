@@ -150,14 +150,14 @@ Logging
 Scale Application
 -----------------
 
-When your project become big, it's better to split it the several small projects.
-`Axe` allow you to assemble several app together when needed::
+When your project becomes big, it's better to split it into several small projects.
+`Axe` allow you to assemble several WSGI application together when needed::
 
     from MyVanillaApiV1 import v1
     from MyVanillaApiV2 import v2
     from MyVanillaWeb import web
     app = Axe()
-    app.build({
+    app.proxy({
         '/api/1': v1,
         '/api/2': v2,
         '/': web,
