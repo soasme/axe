@@ -137,3 +137,28 @@ Use `axe.error` to define the error action::
     @error(404)
     def not_found(exc):
         return template('not_found.html')
+
+About Response
+--------------
+
+Sessions
+--------
+
+Logging
+-------
+
+Scale Application
+-----------------
+
+When your project become big, it's better to split it the several small projects.
+`Axe` allow you to assemble several app together when needed::
+
+    from MyVanillaApiV1 import v1
+    from MyVanillaApiV2 import v2
+    from MyVanillaWeb import web
+    app = Axe()
+    app.build({
+        '/api/1': v1,
+        '/api/2': v2,
+        '/': web,
+    })
