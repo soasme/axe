@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name="Axe",
-    version="0.0.1a",
+    version="0.0.2a",
     author="Ju Lin",
     author_email="soasme@gmail.com",
     description="Decorator for retrying exec a method",
