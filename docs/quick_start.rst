@@ -106,3 +106,34 @@ Method
 
 `method` parameter is a string in (`GET`, `POST`, `DELETE`, `PUT`,
 `OPTIONS`, `HEAD`).
+
+Redirects and Errors
+--------------------
+
+Use `axe.redirect` to direct the page::
+
+    from axe import redirect, ext
+
+    @ext
+    def require_login(session):
+        if not session:
+            return redirect('/login')
+
+    def index(require_login):
+        return template('index.html')
+
+    def login():
+        return template('login')
+
+    app.build({
+        '/': index,
+        '/login': login,
+    })
+
+Use `axe.error` to define the error action::
+
+    from axe import error
+
+    @error(404)
+    def not_found(exc):
+        return template('not_found.html')
