@@ -8,8 +8,7 @@ This page gives a good introduction to Axe. You should have Axe installed first.
 A Minimal Application
 ---------------------
 
-A minimal Axe application looks something like this.
-You can save it as `hello_world.py`::
+A minimal Axe application looks something like this::
 
     from axe import Axe
     app = Axe()
@@ -25,7 +24,7 @@ You can save it as `hello_world.py`::
     if __name__ == '__main__':
         app.run_simple(host='127.0.0.1', port=8384)
 
-::
+You can save it as `hello_world.py`::
 
     $ python hello_world.py
 
@@ -33,3 +32,65 @@ Now go to your browser and visit `http://127.0.0.1:8384/ <http://127.0.0.1:8384/
 and you should see `Hello world!` in your screen.
 
 To stop the server, hit Ctrl-C.
+
+WARNING: `run_simple` is for local development. It's strongly recommend
+not to use in production environment.
+
+.. _debug-mode:
+
+Debug Mode
+----------
+
+If you pass `use_debugger=True` parameter to run_simple,
+You will have an excellent debug stacktrace when the page occur error::
+
+    app.run_simple(use_debugger=True)
+
+If you pass `use_reloader=True` parameter to run_simple,
+the server will auto restart whenever a file modified::
+
+    app.run_simple(use_reloader=True)
+
+More information about run_simple, see
+`Werkzeug Documentation of run_simple <http://werkzeug.pocoo.org/docs/serving/#werkzeug.serving.run_simple>`_
+
+Routing
+-------
+
+Static Serve
+------------
+
+Template
+--------
+
+It's you choice to use which template engine: Mako, Plim, Haml, Jinja, etc.
+There is no default template engine now.
+
+Dependency Injection
+--------------------
+
+The route controller functions always have many dependencies: query, form, json,
+headers or any other specific of you project. But it's hard to debug if you
+attach too much values in one `request` object. Here is the solution of `Axe`:
+DI(Dependency Injection). List all the dependencies as parameter in controller
+function, and happy to use them. We call these dependencies as extension in `Axe`.
+There are several default extensions like `query`, `json`, `form`, `headers`, `request`.
+But `Axe` enable you to write your own extensions.
+
+Query
+`````
+
+`query` parameter is a `dict` object that contains key-value map from querystring
+like `/hello?name=world`. Default value is `{}`.
+
+    def hello(query):
+        return query.get('name', '')
+
+    app.build({'/hello': hello})
+
+JSON
+````
+
+`json` paramter is a `dict` object also only if there is request header
+`Content-Type: application/json` with request body in legal JSON encoding.
+Default value is `{}`.
