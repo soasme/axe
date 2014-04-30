@@ -1,36 +1,21 @@
 # -*- coding: utf-8 -*-
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-
-PACKAGE = "axe"
-NAME = "Axe"
-DESCRIPTION = "An Extendable Python Frameword"
-AUTHOR = "Ju Lin"
-AUTHOR_EMAIL = "soasme@gmail.com"
-URL = "http://axe.readthedocs.org/en/latest/"
-VERSION = __import__(PACKAGE).__version__
+import os
+from setuptools import setup
 
 setup(
-    name=NAME,
-    version=VERSION,
-    description=DESCRIPTION,
-    long_description=open("README.md").read(),
-    author=AUTHOR,
-    author_email=AUTHOR_EMAIL,
-    license="MIT",
-    url=URL,
-    packages=['axe', ],
-    include_package_data=True,
+    name="Axe",
+    version="0.0.1a",
+    author="Ju Lin",
+    author_email="soasme@gmail.com",
+    description="Decorator for retrying exec a method",
+    license="MIT License",
+    keywords="Web frameword",
+    url="https://github.com/soasme/axe",
+    packages=['axe'],
     classifiers=[
-        "Development Status :: 3 - Alpha",
-        "Environment :: Web Environment",
-        "Intended Audience :: Developers",
-        "License :: MIT License",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python",
+        "Development Status :: 4 - Beta",
+        "Topic :: Utilities",
+        "License :: OSI Approved :: MIT License",
     ],
-    zip_safe=False,
 )
