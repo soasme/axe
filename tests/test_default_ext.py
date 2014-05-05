@@ -14,3 +14,17 @@ def test_json():
 
 def test_headers():
     assert app.client.get('/headers', headers={'hello': 'world'}).data == b'world'
+
+def test_method_get():
+    assert app.client.get('/method').data == b'GET'
+
+def test_method_post():
+    assert app.client.post('/method').data == b'POST'
+
+def test_method_put():
+    assert app.client.put('/method').data == b'PUT'
+
+def test_method_delete():
+    assert app.client.delete('/method').data == b'DELETE'
+
+# TODO: we need to support head/options/patch
