@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-from werkzeug.exceptions import BadRequest
+from axe.http_exceptions import BadJSON
 
 def get_request(request):
     return request
@@ -29,4 +29,4 @@ def get_json(headers, body):
     try:
         return json.loads(data)
     except ValueError:
-        raise BadRequest('Broken JSON data')
+        raise BadJSON
