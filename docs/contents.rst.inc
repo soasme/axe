@@ -5,3 +5,4 @@ User's Guide
    :maxdepth: 2
 
    quick_start
+   extensions

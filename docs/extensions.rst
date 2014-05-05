@@ -70,12 +70,52 @@ to use one that isn't available, you will see an error
 `axe.errors.UnrecognizedExtension` before app running,
 alas, the app is failed to start.
 
+Sharing an extension across view functions
+------------------------------------------
 
-"Funcargs", a prime example of dependency injection
----------------------------------------------------
+The extension can be applied into all view functions
+that is built by `app.build`. Multiple view functions
+after building will each receive the same extension
+function, and build it within every request.
 
-Sharing an extension across extensions
-----------------------------------------
+Chain
+-----
+
+You can not only use extensions in view functions but
+extension functions can use other extensions themselves.
+Here is a default extension `json` offered by Axe::
+
+    @app.ext
+    def json(headers, body):
+        content_type = headers.get('Content-Type')
+        if content_type != 'application/json':
+            return
+        data = body.decode('utf8')
+        try:
+            return json.loads(data)
+        except ValueError:
+            raise BadJSON
+
+Note that avoid writing circular dependency for
+extensions.
+
 
 Modularity
 ----------
+
+You might got mad by writing many input parameters in a
+view function. As we have ability to chaining extensions,
+Here is a simple example for you to extend the previous
+`config` example. We instantiate an object `exts` where 
+we stick the already defined `config` resource into it::
+
+    class Exts(object):
+        def __init__(config):
+            self.config = config
+
+    @app.ext
+    def exts(config):
+        return Exts(config)
+
+    def index(exts):
+        return exts.config.get('system')
