@@ -42,4 +42,4 @@ def test_method_delete():
 # TODO: we need to support head/options/patch
 
 def test_body():
-    assert app.client.post('/body', data='Whatever').data == 'Whatever'
+    assert app.client.post('/body', data='Whatever').data == b'Whatever'
