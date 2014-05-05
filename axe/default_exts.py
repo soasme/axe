@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+from werkzeug.exceptions import BadRequest
 
 def get_request(request):
     return request
@@ -25,4 +26,7 @@ def get_json(headers, body):
     if content_type != 'application/json':
         return
     data = body.decode('utf8')
-    return json.loads(data)
+    try:
+        return json.loads(data)
+    except ValueError:
+        raise BadRequest('Broken JSON data')

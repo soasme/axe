@@ -2,6 +2,8 @@
 
 from .suites.default_ext import app
 
+# functional test
+
 def test_query():
     assert app.client.get('/query?hello=world').data == b'world'
 
@@ -11,6 +13,11 @@ def test_form():
 def test_json():
     assert app.client.post('/json', data='{"hello":"world"}',
             headers={'Content-Type': 'application/json'}).data == b'world'
+
+def test_broken_json():
+    resp = app.client.post('/json', data='{"hello":"world}',
+            headers={'Content-Type': 'application/json'})
+    assert resp.status_code == 400
 
 def test_headers():
     assert app.client.get('/headers', headers={'hello': 'world'}).data == b'world'
