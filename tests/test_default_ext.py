@@ -19,6 +19,11 @@ def test_broken_json():
             headers={'Content-Type': 'application/json'})
     assert resp.status_code == 400
 
+def test_content_type_is_not_application_json_then_request_body_is_not_json():
+    assert app.client.post('/json', data='{"hello":"world"}',
+            headers={'Content-Type': 'not/application/json'}
+            ).data == b'Expected None JSON'
+
 def test_headers():
     assert app.client.get('/headers', headers={'hello': 'world'}).data == b'world'
 

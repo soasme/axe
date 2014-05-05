@@ -7,6 +7,8 @@ def route_form(form):
     return form['hello']
 
 def route_json(json):
+    if not json:
+        return 'Expected None JSON'
     return json['hello']
 
 def route_headers(headers):
