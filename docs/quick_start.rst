@@ -81,7 +81,7 @@ Query
 `````
 
 `query` parameter is a `dict` object that contains key-value map from querystring
-like `/hello?name=world`. Default value is `{}`.
+like `/hello?name=world`. Default value is `{}`::
 
     def hello(query):
         return query.get('name', '')
