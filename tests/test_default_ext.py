@@ -28,3 +28,6 @@ def test_method_delete():
     assert app.client.delete('/method').data == b'DELETE'
 
 # TODO: we need to support head/options/patch
+
+def test_body():
+    assert app.client.post('/body', data='Whatever').data == 'Whatever'
