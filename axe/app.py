@@ -16,6 +16,7 @@ from .default_exts import (
     get_json,
     get_headers,
     get_method,
+    get_body,
     get_request,
 )
 
@@ -27,6 +28,7 @@ class Axe(object):
         'json': get_json,
         'headers': get_headers,
         'method': get_method,
+        'body': get_body,
         'request': get_request,
     }
 
@@ -66,10 +68,16 @@ class Axe(object):
 
     def get_view_args(self, view, request):
         arg_spec = inspect.getargspec(view)
-        return {
-            name: self.get_ext_value(name, request)
-            for name in arg_spec.args
-        }
+        if len(arg_spec.args) == 1 and 'request' in arg_spec.args:
+            return {'request': request}
+
+        args = {}
+        for name in arg_spec.args:
+            func = self.get_ext(name)
+            func_args = self.get_view_args(func, request)
+            args[name] = func(**func_args)
+
+        return args
 
     def gen_response(self, request):
         adapter = self.views.bind_to_environ(request.environ)
