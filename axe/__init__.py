@@ -16,8 +16,6 @@ __all__ = [
     'Axe',
 ]
 
-__version__ = '0.0.1'
-
 from werkzeug.exceptions import abort
 from werkzeug.utils import redirect
 

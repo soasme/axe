@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import os
 from setuptools import setup
 
 setup(
     name="Axe",
-    version="0.0.2a",
+    version='0.0.3',
     author="Ju Lin",
     author_email="soasme@gmail.com",
-    description="Decorator for retrying exec a method",
+    description="An Extendable Python Web Framework",
+    long_description=open('README.md').read(),
     license="MIT License",
     keywords="Web frameword",
     url="https://github.com/soasme/axe",
