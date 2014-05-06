@@ -5,3 +5,6 @@ class DuplicatedExtension(Exception):
 
 class UnrecognizedExtension(Exception):
     pass
+
+class MissingEndpoint(Exception):
+    pass

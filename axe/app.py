@@ -10,6 +10,7 @@ from werkzeug.wsgi import DispatcherMiddleware
 from .errors import (
     DuplicatedExtension,
     UnrecognizedExtension,
+    MissingEndpoint,
 )
 from .default_exts import (
     get_query,
@@ -55,9 +56,6 @@ class Axe(object):
         except KeyError:
             raise UnrecognizedExtension(name)
 
-    def get_ext_value(self, name, request=None):
-        return self.get_ext(name)(request)
-
     def ext(self, func):
         func_name = func.__name__
         if func_name in self.exts:
@@ -66,7 +64,10 @@ class Axe(object):
         return func
 
     def get_view(self, endpoint):
-        return self.urls[endpoint]
+        try:
+            return self.urls[endpoint]
+        except KeyError:
+            raise MissingEndpoint
 
     def get_view_args(self, view, request):
         arg_spec = inspect.getargspec(view)
@@ -100,7 +101,6 @@ class Axe(object):
             return self.gen_response(request)
         except HTTPException as e:
             return e
-
 
     @property
     def client(self):
