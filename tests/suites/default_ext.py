@@ -20,6 +20,9 @@ def route_method(method):
 def route_body(body):
     return body
 
+def route_cookies(cookies):
+    return cookies.get('key')
+
 from axe import Axe
 app = Axe()
 app.build({
@@ -29,4 +32,5 @@ app.build({
     '/headers': route_headers,
     '/method': route_method,
     '/body': route_body,
+    '/cookies': route_cookies,
 })

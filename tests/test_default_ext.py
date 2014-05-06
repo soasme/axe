@@ -43,3 +43,6 @@ def test_method_delete():
 
 def test_body():
     assert app.client.post('/body', data='Whatever').data == b'Whatever'
+
+def test_cookies():
+    assert app.client.get('/cookies', headers={'COOKIE': 'key=value;'}).data == b'value'

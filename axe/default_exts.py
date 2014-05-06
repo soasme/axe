@@ -18,6 +18,9 @@ def get_body(request):
 def get_headers(request):
     return request.headers
 
+def get_cookies(request):
+    return request.cookies
+
 def get_method(request):
     return request.method
 

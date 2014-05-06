@@ -19,6 +19,7 @@ from .default_exts import (
     get_headers,
     get_method,
     get_body,
+    get_cookies,
     get_request,
 )
 
@@ -31,6 +32,7 @@ class Axe(object):
         'headers': get_headers,
         'method': get_method,
         'body': get_body,
+        'cookies': get_cookies,
         'request': get_request,
     }
 
