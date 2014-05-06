@@ -69,16 +69,21 @@ class Axe(object):
         except KeyError:
             raise MissingEndpoint
 
-    def get_view_args(self, view, request):
+    def get_view_args(self, view, request, cache):
         arg_spec = inspect.getargspec(view)
         if len(arg_spec.args) == 1 and 'request' in arg_spec.args:
-            return {'request': request}
+            cache.update({'request': request})
+            return cache
 
         args = {}
         for name in arg_spec.args:
-            func = self.get_ext(name)
-            func_args = self.get_view_args(func, request)
-            args[name] = func(**func_args)
+            if name in cache:
+                args[name] = cache[name]
+            else:
+                func = self.get_ext(name)
+                func_args = self.get_view_args(func, request, cache)
+                args[name] = func(**func_args)
+                cache[name] = args[name]
 
         return args
 
@@ -86,7 +91,7 @@ class Axe(object):
         adapter = self.views.bind_to_environ(request.environ)
         endpoint, values = adapter.match()
         view = self.get_view(endpoint)
-        args = self.get_view_args(view, request)
+        args = self.get_view_args(view, request, cache={})
         resp = view(**args)
         return Response(resp)
 
