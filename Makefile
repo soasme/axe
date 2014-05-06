@@ -10,3 +10,6 @@ test:
 
 package:
 	python setup.py sdist
+
+rtfd:
+	curl -X POST http://readthedocs.org/build/axe

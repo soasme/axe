@@ -77,35 +77,6 @@ function, and happy to use them. We call these dependencies as extension in `Axe
 There are several default extensions like `query`, `json`, `form`, `headers`,
 `request`, `method`.  But `Axe` enable you to write your own extensions.
 
-Query
-`````
-
-`query` parameter is a `dict` object that contains key-value map from querystring
-like `/hello?name=world`. Default value is `{}`::
-
-    def hello(query):
-        return query.get('name', '')
-
-    app.build({'/hello': hello})
-
-Form
-````
-
-`form` parameter is a `dict` object that coming from form submitted from front.
-Default value is `{}`.
-
-JSON
-````
-
-`json` parameter is a `dict` object also only if there is request header
-`Content-Type: application/json` with request body in legal JSON encoding.
-Default value is `{}`.
-
-Method
-``````
-
-`method` parameter is a string in (`GET`, `POST`, `DELETE`, `PUT`,
-`OPTIONS`, `HEAD`).
 
 Redirects and Errors
 --------------------

@@ -119,3 +119,75 @@ we stick the already defined `config` resource into it::
 
     def index(exts):
         return exts.config.get('system')
+
+Default Extensions
+------------------
+
+Query
+`````
+
+`query` extension return a `dict` object that contains key-value map from querystring
+like `/hello?name=world`. Default value is `{}`. Example::
+
+    def hello(query):
+        return query.get('name', '')
+
+Form
+````
+
+`form` extension return a `dict` object that coming from form submitted from form.
+Default value is `{}`, Example::
+
+    def comment(form):
+        Comment.create(form['email'], form['name'], form['content'])
+
+Body
+````
+
+`body` extension return a string which composed request body. Example::
+
+    def resp_body(body):
+        return body
+
+    $ curl http://localhost:8384/resp_body -d "This is body."
+    This is body.
+
+Cookies
+```````
+
+`cookies` extension return a dict object that is parsed from header
+`HTTP_COOKIE`.
+
+Headers
+```````
+
+`headers` extension return a dict object that is parsed from request headers.
+Example::
+
+    @app.ext
+    def auth(headers):
+        token = headers.get('Authorization', '')
+        if not (token.startswith('Bearer ') and Token.verify(token)):
+            raise InvalidAuthorationToken(token)
+        return Token.get_user_from_token(token)
+
+JSON
+````
+
+`json` extension return a `dict` object only if there is request header
+`Content-Type: application/json` with request body in legal JSON encoding.
+If body is not in valid JSON format, Axe will response 400 Bad Request.
+Default value is `None`.::
+
+    def share(json, auth):
+        if 'facebook' in json:
+            share_to_facebook(auth, json['content'])
+        if 'twitter' in json:
+            share_to_twitter(auth, json['content'])
+        return 204
+
+Method
+``````
+
+`method` extension return a word in upper case, choices: (`GET`, `POST`, `DELETE`, `PUT`,
+`OPTIONS`, `HEAD`).
