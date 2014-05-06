@@ -15,7 +15,13 @@ setup(
     packages=['axe'],
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Topic :: Utilities",
+        'Environment :: Web Environment',
+        'Intended Audience :: Developers',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
         "License :: OSI Approved :: MIT License",
+        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+        'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 )
