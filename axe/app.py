@@ -5,6 +5,7 @@ import inspect
 from werkzeug.exceptions import HTTPException
 from werkzeug.routing import Map, Rule
 from werkzeug.wrappers import Request, Response
+from werkzeug.wsgi import DispatcherMiddleware
 
 from .errors import (
     DuplicatedExtension,
@@ -34,9 +35,10 @@ class Axe(object):
 
     def __init__(self):
         self.urls = {}
+        self.proxies = {}
         self.exts = dict(self.__class__.DEFAULT_EXTS)
         self.views = Map()
-        self._wsgi_app = self.wsgi_app
+        self._wsgi_app = self.axe_wsgi_app
 
     def build(self, urls):
         self.urls = urls
@@ -87,16 +89,18 @@ class Axe(object):
         resp = view(**args)
         return Response(resp)
 
+    def wsgi_app(self, env, start_response):
+        return self._wsgi_app(env, start_response)
+
+    __call__ = wsgi_app
+
     @Request.application
-    def wsgi_app(self, request):
+    def axe_wsgi_app(self, request):
         try:
             return self.gen_response(request)
         except HTTPException as e:
             return e
 
-    def __call__(self, env, start_response):
-        app = self._wsgi_app
-        return app(env, start_response)
 
     @property
     def client(self):
@@ -109,12 +113,22 @@ class Axe(object):
 
     def add_static_folder(self, route, path):
         from werkzeug.wsgi import SharedDataMiddleware
-        self._wsgi_app = SharedDataMiddleware(self._wsgi_app, {
-            route: path
-        })
+        self._wsgi_app = SharedDataMiddleware(
+            self._wsgi_app, {
+                route: path
+            }
+        )
 
     def add_route_dispatcher(self, route, wsgi_app):
-        from werkzeug.wsgi import DispatcherMiddleware
-        self._wsgi_app = DispatcherMiddleware(self._wsgi_app, {
-            route: wsgi_app
-        })
+        self._wsgi_app = DispatcherMiddleware(
+            self._wsgi_app, {
+                route: wsgi_app
+            }
+        )
+
+    def proxy(self, mounts):
+        self.mounts = mounts
+        self._wsgi_app = DispatcherMiddleware(
+            self._wsgi_app,
+            mounts
+        )
