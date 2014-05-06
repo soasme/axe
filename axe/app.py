@@ -71,9 +71,8 @@ class Axe(object):
 
     def get_view_args(self, view, request, cache):
         arg_spec = inspect.getargspec(view)
-        if len(arg_spec.args) == 1 and 'request' in arg_spec.args:
+        if 'request' in arg_spec.args:
             cache.update({'request': request})
-            return cache
 
         args = {}
         for name in arg_spec.args:
