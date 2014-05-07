@@ -3,8 +3,5 @@
 class DuplicatedExtension(Exception):
     pass
 
-class UnrecognizedExtension(Exception):
-    pass
-
 class MissingEndpoint(Exception):
     pass

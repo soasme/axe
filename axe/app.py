@@ -9,7 +9,6 @@ from werkzeug.wsgi import DispatcherMiddleware
 
 from .errors import (
     DuplicatedExtension,
-    UnrecognizedExtension,
     MissingEndpoint,
 )
 from .default_exts import (
