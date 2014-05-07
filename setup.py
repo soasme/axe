@@ -32,14 +32,14 @@ All variable are injected into view function through function name inspired by `
 - Where can I get help?
 
 You can ask any question in [Github Issue](https://github.com/soasme/axe/issues)  :)
-Read documentation here: http://axe.rtfd.com
+Read documentation here: http://axe.rtfd.org
 """
 
 from setuptools import setup
 
 setup(
     name="Axe",
-    version='0.0.3b',
+    version='0.0.4',
     author="Ju Lin",
     author_email="soasme@gmail.com",
     description="An Extendable Python Web Framework",
