@@ -39,7 +39,7 @@ from setuptools import setup
 
 setup(
     name="Axe",
-    version='0.0.3',
+    version='0.0.3b',
     author="Ju Lin",
     author_email="soasme@gmail.com",
     description="An Extendable Python Web Framework",
