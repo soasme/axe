@@ -30,8 +30,8 @@ def test_register_ext_duplicated(axe):
             pass
 
 def test_unrecognized_ext(axe):
-    with pytest.raises(errors.UnrecognizedExtension):
-        axe.build({'/': lambda unrecognized_ext: ''})
+    axe.build({'/': lambda unrecognized_ext: str(unrecognized_ext)})
+    assert axe.client.get('/').data == b'None'
 
 def test_get_ext_by_name(axe):
     @axe.ext

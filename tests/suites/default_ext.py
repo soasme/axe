@@ -23,6 +23,9 @@ def route_body(body):
 def route_cookies(cookies):
     return cookies.get('key')
 
+def route_posts(post_id):
+    return 'This is post %s' % post_id
+
 from axe import Axe
 app = Axe()
 app.build({
@@ -33,4 +36,5 @@ app.build({
     '/method': route_method,
     '/body': route_body,
     '/cookies': route_cookies,
+    '/posts/<int:post_id>': route_posts,
 })

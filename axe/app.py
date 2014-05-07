@@ -47,16 +47,12 @@ class Axe(object):
         self.urls = urls
         for key in urls:
             rule = Rule(key, endpoint=key)
-            arg_spec = inspect.getargspec(urls[key])
-            for ext in arg_spec.args:
-                self.get_ext(ext)
             self.views.add(rule)
 
     def get_ext(self, name):
-        try:
-            return self.exts[name]
-        except KeyError:
-            raise UnrecognizedExtension(name)
+        if name not in self.exts:
+            return
+        return self.exts[name]
 
     def ext(self, func):
         func_name = func.__name__
@@ -78,10 +74,12 @@ class Axe(object):
 
         args = {}
         for name in arg_spec.args:
+            func = self.get_ext(name)
             if name in cache:
                 args[name] = cache[name]
+            elif not func:
+                args[name] = cache[name] = None
             else:
-                func = self.get_ext(name)
                 func_args = self.get_view_args(func, request, cache)
                 args[name] = func(**func_args)
                 cache[name] = args[name]
@@ -93,6 +91,9 @@ class Axe(object):
         endpoint, values = adapter.match()
         view = self.get_view(endpoint)
         args = self.get_view_args(view, request, cache={})
+        for arg in args:
+            if arg in values:
+                args[arg] = values[arg]
         resp = view(**args)
         return Response(resp)
 

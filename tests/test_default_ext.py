@@ -46,3 +46,6 @@ def test_body():
 
 def test_cookies():
     assert app.client.get('/cookies', headers={'COOKIE': 'key=value;'}).data == b'value'
+
+def test_args_in_route():
+    assert app.client.get('/posts/1').data == b'This is post 1'
