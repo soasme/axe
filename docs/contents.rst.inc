@@ -6,3 +6,4 @@ User's Guide
 
    quick_start
    extensions
+   grow

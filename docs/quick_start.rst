@@ -118,6 +118,8 @@ Sessions
 Logging
 -------
 
+.. _scale-application:
+
 Scale Application
 -----------------
 
