@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 import werkzeug.exceptions as exceptions
-from werkzeug.exceptions import abort
 from werkzeug.utils import redirect
 
 from .app import Axe
+from .utils import abort
