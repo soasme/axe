@@ -98,7 +98,7 @@ class Axe(object):
             resp = view(**args)
             return Response(resp)
         except Exception as e:
-            for exp, handler in self.errors.iteritems():
+            for exp, handler in self.errors.items():
                 if isinstance(e, exp):
                     return Response(handler(e))
             raise e

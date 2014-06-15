@@ -97,4 +97,4 @@ def test_capture_exception(axe):
     def index():
         raise Error
     axe.build({'/': index})
-    assert axe.client.get('/').data == 'Error'
+    assert axe.client.get('/').data == b'Error'
