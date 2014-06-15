@@ -12,10 +12,12 @@
 __all__ = [
     'abort',
     'redirect',
+    'exceptions',
 
     'Axe',
 ]
 
+import werkzeug.exceptions as exceptions
 from werkzeug.exceptions import abort
 from werkzeug.utils import redirect
 
