@@ -8,4 +8,4 @@ def abort(http_status_code, **kwargs):
     except HTTPException as e:
         if len(kwargs):
             e.data = kwargs
-        raise e
+        raise
