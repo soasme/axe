@@ -90,3 +90,11 @@ def test_add_static_folder_success(axe, tmpdir):
     axe.add_static_folder('/media', tmpdir.strpath)
     assert axe.client.get('/media/sub/hello.css').data == content
 
+def test_capture_exception(axe):
+    class Error(Exception): pass
+    def handler(e): return 'Error'
+    axe.register_errors(errs={Error: handler})
+    def index():
+        raise Error
+    axe.build({'/': index})
+    assert axe.client.get('/').data == 'Error'

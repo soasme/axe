@@ -40,6 +40,7 @@ class Axe(object):
         self.proxies = {}
         self.exts = dict(self.__class__.DEFAULT_EXTS)
         self.views = Map()
+        self.errors = {}
         self._wsgi_app = self.axe_wsgi_app
 
     def build(self, urls):
@@ -88,13 +89,19 @@ class Axe(object):
     def gen_response(self, request):
         adapter = self.views.bind_to_environ(request.environ)
         endpoint, values = adapter.match()
-        view = self.get_view(endpoint)
-        args = self.get_view_args(view, request, cache={})
-        for arg in args:
-            if arg in values:
-                args[arg] = values[arg]
-        resp = view(**args)
-        return Response(resp)
+        try:
+            view = self.get_view(endpoint)
+            args = self.get_view_args(view, request, cache={})
+            for arg in args:
+                if arg in values:
+                    args[arg] = values[arg]
+            resp = view(**args)
+            return Response(resp)
+        except Exception as e:
+            for exp, handler in self.errors.iteritems():
+                if isinstance(e, exp):
+                    return Response(handler(e))
+            raise e
 
     def wsgi_app(self, env, start_response):
         return self._wsgi_app(env, start_response)
@@ -138,3 +145,6 @@ class Axe(object):
             self._wsgi_app,
             mounts
         )
+
+    def register_errors(self, errs):
+        self.errors.update(errs)
