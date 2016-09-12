@@ -18,14 +18,14 @@ def test_build_from_urls(axe):
     assert axe.urls['/'] == func
 
 def test_register_ext_success(axe):
-    @axe.ext
+    @axe.di
     def test(request):
         pass
     assert axe.exts['test'] == test
 
 def test_register_ext_duplicated(axe):
     with pytest.raises(errors.DuplicatedExtension):
-        @axe.ext
+        @axe.di
         def query(request):
             pass
 
@@ -34,7 +34,7 @@ def test_unrecognized_ext(axe):
     assert axe.client.get('/').data == b'None'
 
 def test_get_ext_by_name(axe):
-    @axe.ext
+    @axe.di
     def test(request):
         pass
     assert axe.get_ext('test') == test
@@ -53,7 +53,7 @@ def test_get_request_ext_if_view_has_only_one_request(axe):
     assert axe.get_view_args(view, 'request', {}) == {'request': 'request'}
 
 def test_get_request_ext_with_other(axe):
-    @axe.ext
+    @axe.di
     def others(request):
         return 'others'
     view = lambda request, others: ''
@@ -64,7 +64,7 @@ def test_get_request_ext_with_other(axe):
     }
 
 def test_get_ext_without_request(axe):
-    @axe.ext
+    @axe.di
     def whatever(request):
         return 'whatever'
     view = lambda whatever: ''

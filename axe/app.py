@@ -54,7 +54,7 @@ class Axe(object):
             return
         return self.exts[name]
 
-    def ext(self, func):
+    def di(self, func):
         func_name = func.__name__
         if func_name in self.exts:
             raise DuplicatedExtension
