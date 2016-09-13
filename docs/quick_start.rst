@@ -73,9 +73,9 @@ The route controller functions always have many dependencies: query, form, json,
 headers or any other specific of you project. But it's hard to debug if you
 attach too much values in one `request` object. Here is the solution of `Axe`:
 DI(Dependency Injection). List all the dependencies as parameter in controller
-function, and happy to use them. We call these dependencies as extension in `Axe`.
-There are several default extensions like `query`, `json`, `form`, `headers`,
-`request`, `method`.  But `Axe` enable you to write your own extensions.
+function, and happy to use them. We call these dependencies as `di` in `Axe`.
+There are several default `di` like `query`, `json`, `form`, `headers`,
+`request`, `method`.  But `Axe` enable you to write your own `di`.
 
 
 Redirects and Errors
@@ -83,9 +83,9 @@ Redirects and Errors
 
 Use `axe.redirect` to direct the page::
 
-    from axe import redirect, ext
+    from axe import redirect, di
 
-    @ext
+    @di
     def require_login(session):
         if not session:
             return redirect('/login')
