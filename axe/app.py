@@ -55,6 +55,8 @@ class Axe(object):
         return self.exts[name]
 
     def di(self, func):
+        """Decorator `@di`.
+        """
         func_name = func.__name__
         if func_name in self.exts:
             raise DuplicatedExtension
