@@ -1,18 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
-# Axe
-
-Axe is a Python Generative AI toolkit.
-It offers a set of tools for building AI framework easier.
-
-
-## Where can I get help?
-
-Please report issues on [Github Issue](https://github.com/soasme/axe/issues).
-Read documentation here: http://axe.rtfd.org
-"""
-
 from setuptools import setup
+from pathlib import Path
 
 setup(
     name="Axe",
@@ -20,7 +7,8 @@ setup(
     author="Ju Lin",
     author_email="soasme@gmail.com",
     description="Axe is a Python Generative AI toolkit",
-    long_description=__doc__,
+    long_description=(Path(__file__).parent / "README.md").read_text(),
+    long_description_content_type="text/markdown",
     license="MIT License",
     keywords="AI,GPT,GenerativeAI,Transformer",
     url="https://github.com/soasme/axe",

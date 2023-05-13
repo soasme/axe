@@ -1,49 +1,25 @@
-Axe
-========
+# Axe
 
 [![Build Status](https://travis-ci.org/soasme/axe.svg?branch=master)](https://travis-ci.org/soasme/axe)
 [Documentation](http://axe.readthedocs.org/en/latest/)
 
-### What is Axe?
+## What is Axe?
 
-Axe is an extremely extendable web framework for Python based on `Werkzeug`.
-It help developer keep project easy to extend and test when project grows.
+Axe is a Python Generative AI application library.
+It offers various utilities for building Generative AI application.
 
-Unlike Flask, there is no **Thread-Local** variables like `flask.request`, `flask.g`.
-All variable are injected into view function through function name inspired by `py.test fixture`.
-
-**Warning**: It's still experimental and has many buggy.
-
-### Example
-
-```python
-from axe import Axe
-import os
-app = Axe()
-
-@app.ext
-def config():
-    return {'system': os.name}
-
-def index(config):
-    return config.get('system', 'Unknown')
-
-app.build({'/': index})
-
-if __name__ == '__main__':
-    app.run_simple()
-```
+Axe does not provide any Generative AI model, but it leaves
+full freedom to the developer to choose the model and how to
+chain the thoughts.
 
 ### How to run tests?
 
-Run All tests:
+Run all test cases:
 
-    $ tox
-
-Run single case:
-
-    $ py.test tests/test_basic.py -k test_get_index
+```bash
+$ tox
+```
 
 ### Where can I get help?
 
-You can ask any question in [Github Issue](https://github.com/soasme/axe/issues)  :)
+* [Github Issue](https://github.com/soasme/axe/issues).
