@@ -1,7 +1,17 @@
 from dataclasses import dataclass
+from collections import defaultdict
+from typing import List, Any
+
+class Parser:
+
+    def prompt(self) -> str:
+        raise NotImplementedError
+
+    def parse(self, text: str) -> Any:
+        raise NotImplementedError
 
 @dataclass
-class BooleanParser:
+class BooleanParser(Parser):
 
     true_value: str = 'yes'
     false_value: str = 'no'
@@ -34,3 +44,18 @@ class SeparatedListParser:
 
     def parse(self, text: str) -> List[str]:
         return text.strip().split(f'{self.separator} ')
+
+@dataclass
+class CombineParser:
+
+    parsers: List[Parser]
+
+    def prompt(self) -> str:
+        nth = defaultdict(lambda: 'th')
+        nth[1] = 'st'
+        nth[2] = 'nd'
+        return '\n'.join([
+            f'For the {i+1}{nth[i+1]} output: {p.prompt()}\n'
+            f'Then produce two newline characters.'
+            for i, p in enumerate(self.parsers)
+        ])
