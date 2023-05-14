@@ -18,7 +18,7 @@ class BooleanParser(Parser):
 
     def prompt(self) -> str:
         return (
-            f'You should respond with `{self.true_value}` '
+            f'Print `{self.true_value}` '
             f'or `{self.false_value}`.'
         )
 
@@ -38,8 +38,8 @@ class SeparatedListParser:
 
     def prompt(self) -> str:
         return (
-            f'You should respond with a list of {self.separator_name} separated '
-            f'values, such as `one{self.separator} two{self.separator} three`.'
+            f'Print a list of values joined by {self.separator_name}, '
+            f'such as `one{self.separator} two{self.separator} three`.'
         )
 
     def parse(self, text: str) -> List[str]:
@@ -51,11 +51,8 @@ class CombineParser:
     parsers: List[Parser]
 
     def prompt(self) -> str:
-        nth = defaultdict(lambda: 'th')
-        nth[1] = 'st'
-        nth[2] = 'nd'
         return '\n'.join([
-            f'For the {i+1}{nth[i+1]} output: {p.prompt()}\n'
-            f'Then produce two newline characters.'
+            f'{i+1}. {p.prompt()} '
+            f'Then print two newline characters.\n'
             for i, p in enumerate(self.parsers)
         ])
