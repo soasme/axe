@@ -1,0 +1,18 @@
+[project]
+name = "cowsay"
+version = "0.1.0"
+description = "The mandatory cowsay demo, shipped as a single binary by axe."
+requires-python = ">=3.12"
+
+[project.scripts]
+cowsay = "cowsay:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cowsay"]
+
+[tool.axe]
+expose = ["python-path", "metadata"]

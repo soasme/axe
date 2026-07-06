@@ -1,0 +1,13 @@
+# Compiled runtime stubs (built by scripts/build_stubs.py / CI)
+src/axe/stubs/*
+!src/axe/stubs/.gitkeep
+
+# Python
+__pycache__/
+*.egg-info/
+dist/
+.venv/
+.pytest_cache/
+
+# Go
+runtime/axe-runtime*
