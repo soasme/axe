@@ -3,6 +3,8 @@
 import os
 import sys
 
+import six
+
 
 def say(message: str) -> str:
     top = " " + "_" * (len(message) + 2)
@@ -17,7 +19,7 @@ def say(message: str) -> str:
 
 
 def main() -> int:
-    message = " ".join(sys.argv[1:]) or "moo"
+    message = six.ensure_str(" ".join(sys.argv[1:]) or "moo")
     print(say(message))
     if os.environ.get("AXE") == "1":
         print("(running from an axe binary)", file=sys.stderr)

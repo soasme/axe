@@ -23,6 +23,8 @@ type config struct {
 	Expose        []string   `json:"expose"`
 	Fingerprint   string     `json:"fingerprint"`
 	WheelName     string     `json:"wheel_name"`
+	UVArchive     string     `json:"uv_archive"`
+	PythonArchive string     `json:"python_archive"`
 }
 
 func parseConfig(data []byte) (*config, error) {
@@ -38,6 +40,8 @@ func parseConfig(data []byte) (*config, error) {
 		{"uv_version", c.UVVersion},
 		{"fingerprint", c.Fingerprint},
 		{"wheel_name", c.WheelName},
+		{"uv_archive", c.UVArchive},
+		{"python_archive", c.PythonArchive},
 	} {
 		if field.value == "" {
 			return nil, fmt.Errorf("embedded config is missing %q", field.name)

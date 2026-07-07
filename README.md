@@ -1,14 +1,14 @@
 # Axe
 
-Axe ships your Python app as a self-bootstrapping single-file binary — for
-every major platform, from any machine, with **zero** extra toolchain.
+Axe ships your Python app as a **fully self-contained** single-file binary —
+for every major platform, from any machine, with zero extra toolchain.
 
 - **App developers** need no Go, no cross-compilers, no Docker. Axe's wheel
-  ships precompiled runtime stubs; `axe build` just glues your app onto them.
-- **App users** need no Python and no uv. The binary bootstraps a cached
-  environment on first run (uv installs Python and your app) and is instant on
-  every run after — the same runtime contract as
-  [pyapp](https://github.com/ofek/pyapp), uv-first.
+  ships precompiled runtime stubs; `axe build` glues your app onto them.
+- **App users** need no Python, no uv, and **no network**. The binary embeds
+  uv, CPython, and every dependency wheel; the first run unpacks them into a
+  cached environment and every run after is instant. Corporate proxy, air-gap,
+  TLS-intercepting middlebox — none of it matters.
 
 ## Quick start
 
@@ -21,19 +21,18 @@ $ uv init --package mycli
 $ cd mycli
 $ uv add --dev axe
 $ uv run axe build --all-platforms
-built dist/bin/mycli-0.1.0-linux-amd64
-built dist/bin/mycli-0.1.0-linux-arm64
-built dist/bin/mycli-0.1.0-darwin-amd64
-built dist/bin/mycli-0.1.0-darwin-arm64
-built dist/bin/mycli-0.1.0-windows-amd64.exe
+built dist/bin/mycli-0.1.0-linux-amd64 (52 MB, python 3.12.13, 0 dependency wheels)
+built dist/bin/mycli-0.1.0-linux-arm64 (50 MB, python 3.12.13, 0 dependency wheels)
+built dist/bin/mycli-0.1.0-darwin-amd64 (48 MB, python 3.12.13, 0 dependency wheels)
+built dist/bin/mycli-0.1.0-darwin-arm64 (47 MB, python 3.12.13, 0 dependency wheels)
+built dist/bin/mycli-0.1.0-windows-amd64.exe (55 MB, python 3.12.13, 0 dependency wheels)
 ```
 
-Hand the binary to anyone — no Python, no uv, nothing to install:
+Hand the binary to anyone — nothing to install, nothing to download:
 
 ```console
 $ ./dist/bin/mycli-0.1.0-darwin-arm64
 setting up mycli 0.1.0 (first run)...
-downloading uv 0.10.6...
 done.
 Hello from mycli!
 
@@ -45,15 +44,31 @@ A fuller example lives in [`examples/cowsay`](examples/cowsay).
 
 ## How it works
 
-`axe build` builds your project's wheel with uv, then appends it — plus a
-small JSON config — to a precompiled Go runtime stub for each target platform.
-Building is byte concatenation, so cross-"compiling" all platforms takes
-seconds anywhere.
+`axe build` assembles, per target platform, a payload containing everything a
+machine needs to run your app:
 
-At first run the stub downloads a pinned uv (checksum-verified, cached across
-apps), lets uv provision the pinned CPython, installs the embedded wheel into
-a per-app environment keyed by payload fingerprint, and hands off to your app
-(`execvp` on Unix). Subsequent runs are a single existence check.
+- your project's wheel (built with uv),
+- every dependency wheel, resolved *for that platform* (`uv pip compile
+  --python-platform` + `pip download`),
+- a pinned CPython from
+  [python-build-standalone](https://github.com/astral-sh/python-build-standalone),
+- a pinned [uv](https://github.com/astral-sh/uv),
+
+and appends it to a small precompiled Go runtime stub. All artifacts are
+fetched once on the *build* machine (checksum-verified, cached), so builds
+after the first are seconds.
+
+At first run the stub unpacks the embedded Python and uv, creates a venv, and
+installs the embedded wheels with `--offline --no-index` — the runtime
+contains no network code at all. Installations live in a per-app directory
+keyed by payload fingerprint, so a new binary version gets a fresh
+environment automatically. Subsequent runs are a single existence check, then
+`execvp` straight into your app.
+
+Because dependencies are shipped as wheels, every dependency must publish a
+wheel for each target platform (pure-Python wheels cover all of them).
+Binaries weigh roughly 45–60 MB — that's a complete CPython plus uv; disk is
+cheap, broken installs are not.
 
 ## Configuration
 
@@ -63,8 +78,10 @@ Everything is optional; defaults come from `[project]`:
 [tool.axe]
 entrypoint = "mycli"          # default: the sole [project.scripts] entry
                               # also accepts "-m pkg" or "pkg.mod:func"
-python = "3.12"               # default: lower bound of requires-python
-uv-version = "0.10.6"         # uv the runtime bootstraps
+python = "3.12"               # "3.X" picks the newest 3.X.*; "3.X.Y" pins
+                              # default: lower bound of requires-python
+uv-version = "0.10.6"         # uv embedded into the binary
+python-release = "20260623"   # python-build-standalone release tag
 expose = ["metadata"]         # extra `self` commands: python, python-path,
                               # cache, metadata — or "all"
 ```
@@ -99,7 +116,7 @@ This is the one place a Go toolchain is required:
 
 ```console
 $ python scripts/build_stubs.py   # cross-compile runtime stubs (needs go)
-$ uv run pytest                   # unit + end-to-end tests
+$ uv run pytest                   # unit + end-to-end tests (offline-verified)
 $ cd runtime && go test ./...     # runtime unit tests
 $ uv build                        # the wheel, stubs included
 ```

@@ -3,6 +3,8 @@ name = "cowsay"
 version = "0.1.0"
 description = "The mandatory cowsay demo, shipped as a single binary by axe."
 requires-python = ">=3.12"
+# A real dependency so the end-to-end tests exercise embedded wheel installs.
+dependencies = ["six>=1.16"]
 
 [project.scripts]
 cowsay = "cowsay:main"

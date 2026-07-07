@@ -7,18 +7,25 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
+// markerName flags a completed installation. The bootstrap happens directly
+// in the final directory (the venv bakes absolute paths to the embedded
+// Python, so it cannot be built elsewhere and renamed); the marker is written
+// last, and a directory without it is treated as crash residue and rebuilt.
+const markerName = ".axe-installed"
+
 // isInstalled is the fast path checked on every run.
 func isInstalled(install string) bool {
-	_, err := os.Stat(install)
+	_, err := os.Stat(filepath.Join(install, markerName))
 	return err == nil
 }
 
-// ensureInstalled bootstraps the environment on first run: uv -> venv with
-// the pinned Python -> install the embedded wheel. The bootstrap happens in a
-// temp directory renamed into place, so a partial install is never observed.
+// ensureInstalled bootstraps the environment on first run — with zero
+// network access: uv, CPython, and every wheel come from the embedded
+// payload.
 func ensureInstalled(c *config, p *payload) (string, error) {
 	install, err := installDir(c)
 	if err != nil {
@@ -43,63 +50,85 @@ func ensureInstalled(c *config, p *payload) (string, error) {
 	}
 
 	statusf("setting up %s %s (first run)...", c.Name, c.Version)
-	uv, err := ensureUV(c.UVVersion)
-	if err != nil {
-		return "", err
-	}
-
-	tmp := fmt.Sprintf("%s.tmp-%d", install, os.Getpid())
-	if err := os.RemoveAll(tmp); err != nil {
-		return "", err
-	}
-	defer os.RemoveAll(tmp)
-
-	if err := bootstrap(c, p, uv, tmp); err != nil {
-		return "", err
-	}
-
-	if err := os.Rename(tmp, install); err != nil {
-		if isInstalled(install) { // lost a race; the other install is fine
-			return install, nil
-		}
+	if err := bootstrap(c, p, install); err != nil {
 		return "", err
 	}
 	statusf("done.")
 	return install, nil
 }
 
-func bootstrap(c *config, p *payload, uv, dir string) error {
-	// --relocatable: the venv is created in a temp dir and renamed into place
-	// atomically, so nothing inside it may reference the temp path.
-	if err := runUV(uv, "venv", "--relocatable", "--python", c.PythonVersion, venvDir(dir)); err != nil {
-		return fmt.Errorf("creating virtual environment: %w", err)
-	}
-
-	wheel, err := p.wheelBytes()
-	if err != nil {
-		return fmt.Errorf("reading embedded wheel: %w", err)
-	}
-	wheelPath := filepath.Join(dir, c.WheelName)
-	if err := os.WriteFile(wheelPath, wheel, 0o644); err != nil {
+func bootstrap(c *config, p *payload, install string) error {
+	// Clear crash residue from a previous interrupted bootstrap.
+	if err := os.RemoveAll(install); err != nil {
 		return err
 	}
-	defer os.Remove(wheelPath)
+	if err := os.MkdirAll(install, 0o755); err != nil {
+		return err
+	}
 
-	if err := runUV(uv, "pip", "install", "--python", venvPython(dir), wheelPath); err != nil {
+	uv, err := ensureUV(c, p)
+	if err != nil {
+		return err
+	}
+
+	pythonArchive, err := p.open(c.PythonArchive)
+	if err != nil {
+		return err
+	}
+	defer pythonArchive.Close()
+	if err := untarGz(pythonArchive, filepath.Join(install, "python"), true); err != nil {
+		return fmt.Errorf("extracting embedded Python: %w", err)
+	}
+
+	wheelsDir := filepath.Join(install, "wheels")
+	if err := extractWheels(p, wheelsDir); err != nil {
+		return fmt.Errorf("extracting embedded wheels: %w", err)
+	}
+	defer os.RemoveAll(wheelsDir)
+
+	if err := runUV(uv, "venv", "--python", pbsPython(install), venvDir(install)); err != nil {
+		return fmt.Errorf("creating virtual environment: %w", err)
+	}
+	if err := runUV(uv,
+		"pip", "install",
+		"--python", venvPython(install),
+		"--offline", "--no-index",
+		"--find-links", wheelsDir,
+		filepath.Join(wheelsDir, c.WheelName),
+	); err != nil {
 		return fmt.Errorf("installing application: %w", err)
+	}
+
+	return os.WriteFile(filepath.Join(install, markerName), []byte(c.Fingerprint+"\n"), 0o644)
+}
+
+func extractWheels(p *payload, dest string) error {
+	if err := os.MkdirAll(dest, 0o755); err != nil {
+		return err
+	}
+	for _, name := range p.wheelNames() {
+		data, err := p.readAll(name)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(filepath.Join(dest, strings.TrimPrefix(name, "wheels/")), data, 0o644); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
 // runUV runs uv with user configuration disabled so behavior is identical on
-// every machine (the same guarantee pyapp makes for pip).
+// every machine.
 func runUV(uv string, args ...string) error {
 	if os.Getenv("AXE_DEBUG") == "" {
 		args = append(args, "--quiet")
 	}
 	debugf("running: %s %v", uv, args)
 	cmd := exec.Command(uv, args...)
-	cmd.Env = append(os.Environ(), "UV_NO_CONFIG=1")
+	// UV_OFFLINE guarantees uv can never reach for the network, even for
+	// operations where we don't pass --offline explicitly.
+	cmd.Env = append(os.Environ(), "UV_NO_CONFIG=1", "UV_OFFLINE=1")
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
 	return cmd.Run()

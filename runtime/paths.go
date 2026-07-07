@@ -58,6 +58,15 @@ func venvDir(install string) string {
 	return filepath.Join(install, "venv")
 }
 
+// pbsPython is the interpreter inside the extracted python-build-standalone
+// distribution.
+func pbsPython(install string) string {
+	if runtime.GOOS == "windows" {
+		return filepath.Join(install, "python", "python.exe")
+	}
+	return filepath.Join(install, "python", "bin", "python3")
+}
+
 func venvPython(install string) string {
 	if runtime.GOOS == "windows" {
 		return filepath.Join(venvDir(install), "Scripts", "python.exe")

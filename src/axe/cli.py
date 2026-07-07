@@ -9,7 +9,9 @@ from pathlib import Path
 from . import __version__
 from .build import BuildError, build
 from .config import ConfigError
+from .fetch import FetchError
 from .platforms import platform_strings
+from .resolve import ResolveError
 from .wheel import WheelError
 
 
@@ -57,7 +59,7 @@ def main(argv: list[str] | None = None) -> int:
             platforms=args.platform,
             all_platforms=args.all_platforms,
         )
-    except (BuildError, ConfigError, WheelError, ValueError) as e:
+    except (BuildError, ConfigError, FetchError, ResolveError, WheelError, ValueError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 1
     return 0

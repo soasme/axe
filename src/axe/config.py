@@ -7,7 +7,7 @@ import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from . import DEFAULT_PYTHON_VERSION, DEFAULT_UV_VERSION
+from . import DEFAULT_PYTHON_RELEASE, DEFAULT_PYTHON_VERSION, DEFAULT_UV_VERSION
 
 EXPOSABLE_COMMANDS = ("python", "python-path", "cache", "metadata")
 
@@ -32,15 +32,17 @@ class BuildConfig:
     entrypoint: Entrypoint
     python_version: str
     uv_version: str = DEFAULT_UV_VERSION
+    python_release: str = DEFAULT_PYTHON_RELEASE
     expose: list[str] = field(default_factory=list)
 
-    def runtime_config(self) -> dict:
-        """The JSON document embedded in built binaries, minus fingerprint."""
+    def runtime_config(self, resolved_python: str) -> dict:
+        """The JSON document embedded in built binaries; payload.compose adds
+        the archive names and fingerprint."""
         return {
             "name": self.name,
             "version": self.version,
             "entrypoint": {"kind": self.entrypoint.kind, "value": self.entrypoint.value},
-            "python_version": self.python_version,
+            "python_version": resolved_python,
             "uv_version": self.uv_version,
             "expose": self.expose,
         }
@@ -125,5 +127,6 @@ def load_config(project_dir: Path) -> BuildConfig:
         entrypoint=entrypoint,
         python_version=python_version,
         uv_version=str(axe.get("uv-version", DEFAULT_UV_VERSION)),
+        python_release=str(axe.get("python-release", DEFAULT_PYTHON_RELEASE)),
         expose=list(expose),
     )

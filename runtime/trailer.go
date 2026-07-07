@@ -2,60 +2,33 @@ package main
 
 // Payload trailer parsing. Must mirror src/axe/trailer.py exactly:
 //
-//	[stub][wheel][config JSON][u64 wheel off][u64 wheel len]
-//	[u64 config off][u64 config len][u32 format version]["AXEBIN01"]
+//	[stub][payload zip][u64 payload off][u64 payload len][u32 version]["AXEBIN01"]
+//
+// The payload zip holds config.json, wheels/, uv/<archive>, python/<archive> —
+// everything needed to bootstrap with zero network access.
 
 import (
+	"archive/zip"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 const (
 	trailerMagic         = "AXEBIN01"
-	trailerSize          = 8*4 + 4 + 8
-	trailerFormatVersion = 1
+	trailerSize          = 8 + 8 + 4 + 8
+	trailerFormatVersion = 2
 )
 
 var errNoTrailer = errors.New("no axe payload found in executable (was this binary built with `axe build`?)")
 
-type trailer struct {
-	wheelOffset  uint64
-	wheelLength  uint64
-	configOffset uint64
-	configLength uint64
-}
-
-func parseTrailer(buf []byte, fileSize int64) (*trailer, error) {
-	if len(buf) != trailerSize {
-		return nil, errNoTrailer
-	}
-	if string(buf[trailerSize-8:]) != trailerMagic {
-		return nil, errNoTrailer
-	}
-	t := &trailer{
-		wheelOffset:  binary.LittleEndian.Uint64(buf[0:8]),
-		wheelLength:  binary.LittleEndian.Uint64(buf[8:16]),
-		configOffset: binary.LittleEndian.Uint64(buf[16:24]),
-		configLength: binary.LittleEndian.Uint64(buf[24:32]),
-	}
-	version := binary.LittleEndian.Uint32(buf[32:36])
-	if version != trailerFormatVersion {
-		return nil, fmt.Errorf("unsupported payload format version %d (runtime supports %d)", version, trailerFormatVersion)
-	}
-	end := uint64(fileSize) - trailerSize
-	if t.wheelOffset+t.wheelLength > end || t.configOffset+t.configLength > end {
-		return nil, errors.New("corrupt payload: sections extend past end of file")
-	}
-	return t, nil
-}
-
-// payload gives lazy access to the sections appended to the executable.
+// payload gives access to the zip archive appended to the executable. The
+// underlying file stays open for the process lifetime.
 type payload struct {
-	path    string
-	trailer *trailer
+	zip *zip.Reader
 }
 
 func openPayload(exePath string) (*payload, error) {
@@ -63,8 +36,6 @@ func openPayload(exePath string) (*payload, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot open own executable: %w", err)
 	}
-	defer f.Close()
-
 	info, err := f.Stat()
 	if err != nil {
 		return nil, err
@@ -76,30 +47,52 @@ func openPayload(exePath string) (*payload, error) {
 	if _, err := f.ReadAt(buf, info.Size()-trailerSize); err != nil {
 		return nil, err
 	}
-	t, err := parseTrailer(buf, info.Size())
-	if err != nil {
-		return nil, err
+	if string(buf[20:]) != trailerMagic {
+		return nil, errNoTrailer
 	}
-	return &payload{path: exePath, trailer: t}, nil
+	if version := binary.LittleEndian.Uint32(buf[16:20]); version != trailerFormatVersion {
+		return nil, fmt.Errorf("unsupported payload format version %d (runtime supports %d)", version, trailerFormatVersion)
+	}
+	offset := binary.LittleEndian.Uint64(buf[0:8])
+	length := binary.LittleEndian.Uint64(buf[8:16])
+	if offset+length > uint64(info.Size())-trailerSize {
+		return nil, errors.New("corrupt trailer: payload extends past end of file")
+	}
+	zr, err := zip.NewReader(io.NewSectionReader(f, int64(offset), int64(length)), int64(length))
+	if err != nil {
+		return nil, fmt.Errorf("corrupt payload archive: %w", err)
+	}
+	return &payload{zip: zr}, nil
 }
 
-func (p *payload) readSection(offset, length uint64) ([]byte, error) {
-	f, err := os.Open(p.path)
+func (p *payload) open(name string) (io.ReadCloser, error) {
+	f, err := p.zip.Open(name)
+	if err != nil {
+		return nil, fmt.Errorf("payload is missing %s: %w", name, err)
+	}
+	return f, nil
+}
+
+func (p *payload) readAll(name string) ([]byte, error) {
+	f, err := p.open(name)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
-	buf := make([]byte, length)
-	if _, err := io.ReadFull(io.NewSectionReader(f, int64(offset), int64(length)), buf); err != nil {
-		return nil, err
-	}
-	return buf, nil
+	return io.ReadAll(f)
 }
 
 func (p *payload) configBytes() ([]byte, error) {
-	return p.readSection(p.trailer.configOffset, p.trailer.configLength)
+	return p.readAll("config.json")
 }
 
-func (p *payload) wheelBytes() ([]byte, error) {
-	return p.readSection(p.trailer.wheelOffset, p.trailer.wheelLength)
+// wheelNames lists the payload's wheels/ entries.
+func (p *payload) wheelNames() []string {
+	var names []string
+	for _, f := range p.zip.File {
+		if strings.HasPrefix(f.Name, "wheels/") && !strings.HasSuffix(f.Name, "/") {
+			names = append(names, f.Name)
+		}
+	}
+	return names
 }

@@ -1,17 +1,22 @@
-"""Binary payload trailer: how a stub finds the wheel + config appended to it.
+"""Binary payload trailer: how a stub finds the payload appended to it.
 
-Layout of a built binary:
+Layout of a built binary (format version 2):
 
     [stub executable bytes]
-    [wheel bytes]
-    [config JSON, UTF-8]
-    [trailer, 44 bytes:
-        wheel offset   u64 LE
-        wheel length   u64 LE
-        config offset  u64 LE
-        config length  u64 LE
+    [payload: a single ZIP archive]
+    [trailer, 28 bytes:
+        payload offset u64 LE
+        payload length u64 LE
         format version u32 LE
         magic          "AXEBIN01"]
+
+The payload zip contains everything the first run needs, so no network access
+is ever required on the user's machine:
+
+    config.json                 runtime configuration
+    wheels/*.whl                the app wheel + all dependency wheels
+    uv/<uv release artifact>    uv-<triple>.tar.gz (or .zip on Windows)
+    python/<pbs artifact>       python-build-standalone install_only tarball
 
 The Go runtime (runtime/trailer.go) reads this backwards from EOF; both sides
 must agree exactly.
@@ -25,8 +30,8 @@ from dataclasses import dataclass
 from . import TRAILER_FORMAT_VERSION
 
 MAGIC = b"AXEBIN01"
-TRAILER_STRUCT = struct.Struct("<QQQQI8s")
-TRAILER_SIZE = TRAILER_STRUCT.size  # 44
+TRAILER_STRUCT = struct.Struct("<QQI8s")
+TRAILER_SIZE = TRAILER_STRUCT.size  # 28
 
 
 class TrailerError(Exception):
@@ -35,38 +40,27 @@ class TrailerError(Exception):
 
 @dataclass
 class Payload:
-    wheel: bytes
-    config: bytes  # JSON document
+    data: bytes  # the payload zip
 
 
-def pack(stub: bytes, wheel: bytes, config: bytes) -> bytes:
-    wheel_offset = len(stub)
-    config_offset = wheel_offset + len(wheel)
+def pack(stub: bytes, payload: bytes) -> bytes:
     trailer = TRAILER_STRUCT.pack(
-        wheel_offset,
-        len(wheel),
-        config_offset,
-        len(config),
+        len(stub),
+        len(payload),
         TRAILER_FORMAT_VERSION,
         MAGIC,
     )
-    return stub + wheel + config + trailer
+    return stub + payload + trailer
 
 
 def unpack(binary: bytes) -> Payload:
     if len(binary) < TRAILER_SIZE:
         raise TrailerError("binary too small to contain a trailer")
-    wheel_offset, wheel_len, config_offset, config_len, version, magic = TRAILER_STRUCT.unpack(
-        binary[-TRAILER_SIZE:]
-    )
+    offset, length, version, magic = TRAILER_STRUCT.unpack(binary[-TRAILER_SIZE:])
     if magic != MAGIC:
         raise TrailerError("no axe payload trailer found (bad magic)")
     if version != TRAILER_FORMAT_VERSION:
         raise TrailerError(f"unsupported trailer format version {version}")
-    end = len(binary) - TRAILER_SIZE
-    if config_offset + config_len > end or wheel_offset + wheel_len > end:
+    if offset + length > len(binary) - TRAILER_SIZE:
         raise TrailerError("corrupt trailer: payload extends past end of file")
-    return Payload(
-        wheel=binary[wheel_offset : wheel_offset + wheel_len],
-        config=binary[config_offset : config_offset + config_len],
-    )
+    return Payload(data=binary[offset : offset + length])

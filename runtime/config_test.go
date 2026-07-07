@@ -14,7 +14,9 @@ const validConfig = `{
 	"uv_version": "0.10.6",
 	"expose": ["python-path"],
 	"fingerprint": "abcdef0123456789",
-	"wheel_name": "cowsay-1.0.0-py3-none-any.whl"
+	"wheel_name": "cowsay-1.0.0-py3-none-any.whl",
+	"uv_archive": "uv/uv-aarch64-apple-darwin.tar.gz",
+	"python_archive": "python/cpython-3.12.13+20260623-aarch64-apple-darwin-install_only_stripped.tar.gz"
 }`
 
 func TestParseConfig(t *testing.T) {

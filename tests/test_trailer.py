@@ -1,24 +1,31 @@
+import io
+import zipfile
+
 import pytest
 
 from axe import trailer
 
 
+def make_payload(files: dict[str, bytes]) -> bytes:
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        for name, data in files.items():
+            zf.writestr(name, data)
+    return buf.getvalue()
+
+
+PAYLOAD = make_payload({"config.json": b'{"name": "demo"}', "wheels/demo.whl": b"PK demo"})
+
+
 def test_round_trip():
     stub = b"fake ELF bytes"
-    wheel = b"PK\x03\x04 wheel contents"
-    config = b'{"name": "demo"}'
-    binary = trailer.pack(stub, wheel, config)
+    binary = trailer.pack(stub, PAYLOAD)
 
     assert binary.startswith(stub)
     payload = trailer.unpack(binary)
-    assert payload.wheel == wheel
-    assert payload.config == config
-
-
-def test_empty_sections_round_trip():
-    payload = trailer.unpack(trailer.pack(b"stub", b"", b""))
-    assert payload.wheel == b""
-    assert payload.config == b""
+    assert payload.data == PAYLOAD
+    with zipfile.ZipFile(io.BytesIO(payload.data)) as zf:
+        assert zf.read("config.json") == b'{"name": "demo"}'
 
 
 def test_no_magic():
@@ -32,7 +39,7 @@ def test_too_small():
 
 
 def test_corrupt_offsets():
-    binary = bytearray(trailer.pack(b"stub", b"wheel", b"config"))
+    binary = bytearray(trailer.pack(b"stub", PAYLOAD))
     binary[-trailer.TRAILER_SIZE + 8 : -trailer.TRAILER_SIZE + 16] = (1 << 40).to_bytes(
         8, "little"
     )
@@ -41,7 +48,7 @@ def test_corrupt_offsets():
 
 
 def test_unsupported_version():
-    binary = bytearray(trailer.pack(b"stub", b"wheel", b"config"))
-    binary[-trailer.TRAILER_SIZE + 32 : -trailer.TRAILER_SIZE + 36] = (99).to_bytes(4, "little")
+    binary = bytearray(trailer.pack(b"stub", PAYLOAD))
+    binary[-trailer.TRAILER_SIZE + 16 : -trailer.TRAILER_SIZE + 20] = (99).to_bytes(4, "little")
     with pytest.raises(trailer.TrailerError):
         trailer.unpack(bytes(binary))

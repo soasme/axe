@@ -54,6 +54,47 @@ def current_platform() -> tuple[str, str]:
     return goos, goarch
 
 
+# Rust-style target triples used by uv releases, python-build-standalone
+# artifacts, and uv's --python-platform flag.
+TARGET_TRIPLES: dict[tuple[str, str], str] = {
+    ("linux", "amd64"): "x86_64-unknown-linux-gnu",
+    ("linux", "arm64"): "aarch64-unknown-linux-gnu",
+    ("darwin", "amd64"): "x86_64-apple-darwin",
+    ("darwin", "arm64"): "aarch64-apple-darwin",
+    ("windows", "amd64"): "x86_64-pc-windows-msvc",
+}
+
+
+def target_triple(goos: str, goarch: str) -> str:
+    return TARGET_TRIPLES[(goos, goarch)]
+
+
+def pip_platform_tags(goos: str, goarch: str) -> list[str]:
+    """Wheel platform tags `pip download` should accept for a target.
+
+    pip does not expand e.g. manylinux_2_28 to older glibc tags when
+    --platform is given, so enumerate the range wheels actually publish.
+    """
+    arch = {"amd64": "x86_64", "arm64": "aarch64"}[goarch]
+    if goos == "linux":
+        tags = [f"manylinux_2_{minor}_{arch}" for minor in range(40, 4, -1)]
+        tags += [f"manylinux2014_{arch}", f"manylinux2010_{arch}", f"manylinux1_{arch}"]
+        tags.append(f"linux_{arch}")
+        return tags
+    if goos == "darwin":
+        mac_arch = "arm64" if goarch == "arm64" else "x86_64"
+        tags = []
+        for major in range(26, 10, -1):
+            tags += [f"macosx_{major}_0_{mac_arch}", f"macosx_{major}_0_universal2"]
+        if mac_arch == "x86_64":
+            for minor in range(15, 3, -1):
+                tags += [f"macosx_10_{minor}_x86_64", f"macosx_10_{minor}_universal2"]
+        else:
+            tags += [f"macosx_10_{minor}_universal2" for minor in range(15, 3, -1)]
+        return tags
+    return ["win_amd64"]
+
+
 def stub_filename(goos: str, goarch: str) -> str:
     suffix = ".exe" if goos == "windows" else ""
     return f"axe-runtime-{goos}-{goarch}{suffix}"
