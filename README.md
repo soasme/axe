@@ -20,29 +20,28 @@ project created with `uv init --package` is already set up correctly (a bare
 $ uv init --package mycli
 $ cd mycli
 $ uv add --dev axe
-$ axe build --all-platforms
-built dist/bin/cowsay-0.1.0-linux-amd64
-built dist/bin/cowsay-0.1.0-linux-arm64
-built dist/bin/cowsay-0.1.0-darwin-amd64
-built dist/bin/cowsay-0.1.0-darwin-arm64
-built dist/bin/cowsay-0.1.0-windows-amd64.exe
+$ uv run axe build --all-platforms
+built dist/bin/mycli-0.1.0-linux-amd64
+built dist/bin/mycli-0.1.0-linux-arm64
+built dist/bin/mycli-0.1.0-darwin-amd64
+built dist/bin/mycli-0.1.0-darwin-arm64
+built dist/bin/mycli-0.1.0-windows-amd64.exe
 ```
 
-Hand the binary to anyone:
+Hand the binary to anyone — no Python, no uv, nothing to install:
 
 ```console
-$ ./cowsay-0.1.0-darwin-arm64 hello
-setting up cowsay 0.1.0 (first run)...
+$ ./dist/bin/mycli-0.1.0-darwin-arm64
+setting up mycli 0.1.0 (first run)...
+downloading uv 0.10.6...
 done.
- _______
-< hello >
- -------
-        \   ^__^
-         \  (oo)\_______
-            (__)\       )\/\
-                ||----w |
-                ||     ||
+Hello from mycli!
+
+$ ./dist/bin/mycli-0.1.0-darwin-arm64   # instant from now on
+Hello from mycli!
 ```
+
+A fuller example lives in [`examples/cowsay`](examples/cowsay).
 
 ## How it works
 
