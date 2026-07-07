@@ -1,6 +1,6 @@
 """axe: ship Python apps as self-bootstrapping single-file binaries."""
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 # uv version the runtime stub bootstraps when none is configured. Bumped per
 # axe release.

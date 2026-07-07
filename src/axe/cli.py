@@ -10,6 +10,7 @@ from . import __version__
 from .build import BuildError, build
 from .config import ConfigError
 from .platforms import platform_strings
+from .wheel import WheelError
 
 
 def make_parser() -> argparse.ArgumentParser:
@@ -56,7 +57,7 @@ def main(argv: list[str] | None = None) -> int:
             platforms=args.platform,
             all_platforms=args.all_platforms,
         )
-    except (BuildError, ConfigError, ValueError) as e:
+    except (BuildError, ConfigError, WheelError, ValueError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 1
     return 0

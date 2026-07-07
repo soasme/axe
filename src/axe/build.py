@@ -12,6 +12,7 @@ from pathlib import Path
 
 from . import trailer
 from .config import BuildConfig, load_config
+from .wheel import validate_entrypoint
 from .platforms import (
     SUPPORTED_PLATFORMS,
     binary_filename,
@@ -89,6 +90,11 @@ def build(
     with tempfile.TemporaryDirectory(prefix="axe-build-") as tmp:
         wheel_path = build_wheel(project_dir, Path(tmp))
         wheel_bytes = wheel_path.read_bytes()
+
+    # Refuse to ship a binary whose entrypoint the wheel can't satisfy; that
+    # failure would otherwise surface on the end user's machine after
+    # bootstrap.
+    validate_entrypoint(wheel_bytes, config.entrypoint)
 
     config_bytes = make_runtime_config(config, wheel_path, wheel_bytes)
 

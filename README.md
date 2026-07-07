@@ -12,7 +12,13 @@ every major platform, from any machine, with **zero** extra toolchain.
 
 ## Quick start
 
+Your project needs to be an installable package with a console script — a
+project created with `uv init --package` is already set up correctly (a bare
+`uv init` app is not packaged; `axe build` will tell you what to add):
+
 ```console
+$ uv init --package mycli
+$ cd mycli
 $ uv add --dev axe
 $ axe build --all-platforms
 built dist/bin/cowsay-0.1.0-linux-amd64

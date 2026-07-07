@@ -130,6 +130,27 @@ def test_plain_stub_refuses_to_run(tmp_path, isolated_env: dict[str, str]):
     assert "no axe payload" in result.stderr
 
 
+def test_bare_uv_init_project_fails_at_build_time(tmp_path):
+    # A bare `uv init` app (no [project.scripts], no [build-system]) must be
+    # rejected at build time, not fail on the end user's machine.
+    from axe.wheel import WheelError
+
+    (tmp_path / "pyproject.toml").write_text(
+        """
+[project]
+name = "testaxe"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[tool.axe]
+entrypoint = "testaxe"
+"""
+    )
+    (tmp_path / "main.py").write_text("def main():\n    print('hi')\n")
+    with pytest.raises(WheelError, match="no console scripts"):
+        build(tmp_path, output_dir=tmp_path / "out")
+
+
 def test_all_platforms_build(tmp_path):
     outputs = build(COWSAY, output_dir=tmp_path, all_platforms=True)
     names = sorted(p.name for p in outputs)
