@@ -89,9 +89,13 @@ expose = ["metadata"]         # extra `self` commands: python, python-path,
 ## CLI
 
 ```console
-$ axe build [PROJECT] [-o DIR] [-p OS/ARCH]... [--all-platforms]
+$ axe build [PROJECT] [-o DIR] [-p OS/ARCH]... [--all-platforms] [-q | -v]
 $ axe platforms
 ```
+
+`-q`/`--quiet` prints nothing but errors; `-v`/`--verbose` streams the output
+of the underlying tools (useful behind corporate proxies — if downloads fail
+or stall there, set `UV_NATIVE_TLS=1` so uv uses the system trust store).
 
 Targets: `linux/amd64`, `linux/arm64`, `darwin/amd64`, `darwin/arm64`,
 `windows/amd64`.

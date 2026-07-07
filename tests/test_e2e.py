@@ -214,3 +214,26 @@ def test_cli_smoke(tmp_path):
     )
     assert result.returncode == 0, result.stderr
     assert list(tmp_path.glob("cowsay-*"))
+    assert "built " in result.stdout
+    assert "resolving dependencies" in result.stderr  # progress lines -> stderr
+
+    # --quiet silences everything but errors.
+    result = subprocess.run(
+        [sys.executable, "-m", "axe.cli", "build", "-q", str(COWSAY), "-o", str(tmp_path)],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == ""
+    assert result.stderr == ""
+
+    # -q and -v conflict.
+    result = subprocess.run(
+        [sys.executable, "-m", "axe.cli", "build", "-q", "-v", str(COWSAY)],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert "not allowed with" in result.stderr

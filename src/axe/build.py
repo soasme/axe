@@ -8,12 +8,11 @@ user's first run never touches the network.
 from __future__ import annotations
 
 import shutil
-import subprocess
 import tempfile
 from importlib.resources import files
 from pathlib import Path
 
-from . import payload, trailer
+from . import output, payload, trailer
 from .config import load_config
 from .fetch import fetch_python, fetch_uv, resolve_python
 from .platforms import (
@@ -23,7 +22,8 @@ from .platforms import (
     parse_platform,
     stub_filename,
 )
-from .resolve import compile_requirements, download_wheels
+from .proc import run_tool
+from .resolve import compile_requirements, download_wheels, pinned_count
 from .wheel import validate_entrypoint
 
 
@@ -39,13 +39,12 @@ def find_uv() -> str:
 
 
 def build_wheel(uv: str, project_dir: Path, out_dir: Path) -> Path:
-    result = subprocess.run(
+    output.progress("building project wheel...")
+    run_tool(
         [uv, "build", "--wheel", "--out-dir", str(out_dir), str(project_dir)],
-        capture_output=True,
-        text=True,
+        what="uv build",
+        timeout=300,
     )
-    if result.returncode != 0:
-        raise BuildError(f"uv build failed:\n{result.stderr.strip()}")
     wheels = sorted(out_dir.glob("*.whl"))
     if not wheels:
         raise BuildError("uv build produced no wheel")
@@ -95,15 +94,19 @@ def build(
 
         outputs = []
         for (goos, goarch), stub in stubs.items():
+            target = f"{goos}/{goarch}"
             python_version, python_artifact = resolve_python(
                 config.python_version, config.python_release, goos, goarch
             )
             python_path = fetch_python(python_artifact, config.python_release)
             uv_path = fetch_uv(config.uv_version, goos, goarch)
 
+            output.progress(f"{target}: resolving dependencies...")
             requirements = compile_requirements(
                 uv, project_dir, goos, goarch, python_version
             )
+            if count := pinned_count(requirements):
+                output.progress(f"{target}: downloading {count} dependency wheels...")
             dep_wheels = download_wheels(
                 uv,
                 requirements,
@@ -126,7 +129,7 @@ def build(
             out.write_bytes(trailer.pack(stub, payload_zip))
             out.chmod(0o755)
             outputs.append(out)
-            print(
+            output.result(
                 f"built {out.relative_to(Path.cwd()) if out.is_relative_to(Path.cwd()) else out}"
                 f" ({out.stat().st_size / 1e6:.0f} MB, python {python_version},"
                 f" {len(dep_wheels)} dependency wheels)"

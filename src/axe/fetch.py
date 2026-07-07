@@ -18,7 +18,12 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+from . import output
 from .platforms import target_triple
+
+# Socket inactivity timeout: long enough for slow links, short enough that a
+# black-holing proxy surfaces as an error rather than an apparent hang.
+FETCH_TIMEOUT = 60
 
 UV_RELEASES = "https://github.com/astral-sh/uv/releases/download"
 PBS_RELEASES = "https://github.com/astral-sh/python-build-standalone/releases/download"
@@ -41,9 +46,16 @@ def cache_dir() -> Path:
 
 
 def fetch_url(url: str) -> bytes:
+    if output.verbose():
+        output.progress(f"GET {url}")
     try:
-        with urllib.request.urlopen(url, timeout=600) as resp:
+        with urllib.request.urlopen(url, timeout=FETCH_TIMEOUT) as resp:
             return resp.read()
+    except TimeoutError:
+        raise FetchError(
+            f"timed out fetching {url} (no data for {FETCH_TIMEOUT}s) — "
+            "check network/proxy connectivity to github.com"
+        ) from None
     except urllib.error.URLError as e:
         raise FetchError(f"failed to fetch {url}: {e}") from None
 
@@ -51,7 +63,7 @@ def fetch_url(url: str) -> bytes:
 def _fetch_verified(url: str, dest: Path, sha256: str | None) -> Path:
     if dest.is_file():
         return dest
-    print(f"fetching {url.rsplit('/', 1)[-1]}...")
+    output.progress(f"fetching {url.rsplit('/', 1)[-1]}...")
     data = fetch_url(url)
     if sha256 and hashlib.sha256(data).hexdigest() != sha256:
         raise FetchError(f"checksum mismatch for {url}")

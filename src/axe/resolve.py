@@ -2,22 +2,21 @@
 
 from __future__ import annotations
 
-import subprocess
 import tempfile
 from pathlib import Path
 
 from .fetch import cache_dir
 from .platforms import pip_platform_tags, target_triple
+from .proc import NETWORK_HINT, run_tool
 
-
-class ResolveError(Exception):
-    pass
+COMPILE_TIMEOUT = 300
+DOWNLOAD_TIMEOUT = 900
 
 
 def compile_requirements(uv: str, project_dir: Path, goos: str, goarch: str, python: str) -> str:
     """Pin the full dependency tree for a target platform (markers evaluated
     for that platform, not the build host)."""
-    result = subprocess.run(
+    return run_tool(
         [
             uv,
             "pip",
@@ -33,15 +32,19 @@ def compile_requirements(uv: str, project_dir: Path, goos: str, goarch: str, pyt
             "-o",
             "-",
         ],
+        what=f"dependency resolution for {goos}/{goarch}",
+        timeout=COMPILE_TIMEOUT,
         cwd=project_dir,
-        capture_output=True,
-        text=True,
+        hint=NETWORK_HINT,
     )
-    if result.returncode != 0:
-        raise ResolveError(
-            f"dependency resolution for {goos}/{goarch} failed:\n{result.stderr.strip()}"
-        )
-    return result.stdout
+
+
+def pinned_count(requirements: str) -> int:
+    return sum(
+        1
+        for line in requirements.splitlines()
+        if line.strip() and not line.lstrip().startswith(("#", "-"))
+    )
 
 
 def download_wheels(
@@ -68,7 +71,6 @@ def download_wheels(
         "pip",
         "pip",
         "download",
-        "--quiet",
         "--no-deps",  # the tree is already pinned by uv pip compile
         "--only-binary=:all:",
         "--dest",
@@ -90,12 +92,16 @@ def download_wheels(
     ]
     for tag in pip_platform_tags(goos, goarch):
         cmd += ["--platform", tag]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    Path(reqs_path).unlink(missing_ok=True)
-    if result.returncode != 0:
-        raise ResolveError(
-            f"downloading dependency wheels for {goos}/{goarch} failed "
-            f"(a dependency may not publish wheels for that platform):\n"
-            f"{result.stderr.strip()}"
+    try:
+        run_tool(
+            cmd,
+            what=f"downloading dependency wheels for {goos}/{goarch}",
+            timeout=DOWNLOAD_TIMEOUT,
+            hint=(
+                "A dependency may not publish wheels for that platform. "
+                + NETWORK_HINT
+            ),
         )
+    finally:
+        Path(reqs_path).unlink(missing_ok=True)
     return sorted(dest.glob("*.whl"))

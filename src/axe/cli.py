@@ -6,12 +6,12 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import __version__
+from . import __version__, output
 from .build import BuildError, build
 from .config import ConfigError
 from .fetch import FetchError
 from .platforms import platform_strings
-from .resolve import ResolveError
+from .proc import ToolError
 from .wheel import WheelError
 
 
@@ -40,6 +40,16 @@ def make_parser() -> argparse.ArgumentParser:
     build_cmd.add_argument(
         "--all-platforms", action="store_true", help="build for every supported platform"
     )
+    verbosity = build_cmd.add_mutually_exclusive_group()
+    verbosity.add_argument(
+        "-q", "--quiet", action="store_true", help="print nothing but errors"
+    )
+    verbosity.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="stream the output of underlying tools (uv, pip)",
+    )
 
     sub.add_parser("platforms", help="list supported target platforms")
     return parser
@@ -52,6 +62,11 @@ def main(argv: list[str] | None = None) -> int:
         print("\n".join(platform_strings()))
         return 0
 
+    if args.quiet:
+        output.set_level(output.QUIET)
+    elif args.verbose:
+        output.set_level(output.VERBOSE)
+
     try:
         build(
             Path(args.project),
@@ -59,7 +74,7 @@ def main(argv: list[str] | None = None) -> int:
             platforms=args.platform,
             all_platforms=args.all_platforms,
         )
-    except (BuildError, ConfigError, FetchError, ResolveError, WheelError, ValueError) as e:
+    except (BuildError, ConfigError, FetchError, ToolError, WheelError, ValueError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 1
     return 0
