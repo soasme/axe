@@ -1,5 +1,5 @@
 [project]
-name = "axe-build"
+name = "axe"
 version = "0.1.0"
 description = "Zero-friction Python app compiler: ship any Python project as a self-bootstrapping single-file binary."
 readme = "README.md"

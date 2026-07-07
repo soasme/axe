@@ -13,7 +13,7 @@ every major platform, from any machine, with **zero** extra toolchain.
 ## Quick start
 
 ```console
-$ uv add --dev axe-build
+$ uv add --dev axe
 $ axe build --all-platforms
 built dist/bin/cowsay-0.1.0-linux-amd64
 built dist/bin/cowsay-0.1.0-linux-arm64
