@@ -31,7 +31,10 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/axe"]
 # Stub binaries are git-ignored (built by scripts/build_stubs.py / CI) but must
-# ship in the wheel.
+# ship in the wheel and sdist.
+artifacts = ["src/axe/stubs/*"]
+
+[tool.hatch.build.targets.sdist]
 artifacts = ["src/axe/stubs/*"]
 
 [tool.pytest.ini_options]
