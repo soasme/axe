@@ -1,8 +1,7 @@
 # Runtime behavior
 
-Axe's runtime stub replicates [pyapp](https://ofek.dev/pyapp/latest/runtime/)'s
-runtime behavior, rewritten in Go and specialized for axe's design: everything
-the app needs is embedded in the binary, so every network-dependent branch of
+Axe's runtime behavior is rewritten in Go: everything the app needs
+is embedded in the binary, so every network-dependent branch of
 pyapp's flow disappears.
 
 ## Initialization
