@@ -64,6 +64,26 @@ pyapp's conditions that axe resolves at *build* time instead of runtime:
 | Project embedded / dependency file / single project | project + dependency wheels always embedded |
 | Management enabled | always enabled as `self` |
 
+### Differences from PyInstaller
+
+PyInstaller *freezes* an application: its bootloader unpacks a bundle of
+modules collected by static import analysis and runs them inside an embedded
+interpreter. Axe *installs* one: real wheels into a real venv with a full
+CPython, once. That leads to very different runtime behavior:
+
+| PyInstaller (onefile) | axe |
+| --- | --- |
+| Extracts to a fresh temp dir (`_MEIPASS`) on every run, deleted on exit | Unpacks once into a persistent per-app install; every later run is a marker check + exec |
+| App runs inside the bootloader process with `sys.frozen` set | Process is replaced with a normal venv Python; only `AXE=1` marks the install |
+| Modules collected by static import analysis; dynamic imports and data files need hooks/hidden-import hints | Dependencies installed as complete wheels; dynamic imports, package data, `importlib.metadata`, and entry points work as in any venv |
+| `sys.executable` is the frozen binary, so subprocesses that re-invoke Python need special handling (e.g. `multiprocessing.freeze_support`) | `sys.executable` is a real interpreter on disk; subprocesses behave normally |
+| Startup pays the extraction cost every run | Only the first run pays it |
+| No install to manage or clean up beyond temp-dir residue | `self remove` / `restore` / `update` manage the cached install |
+
+The trade-off is size and footprint: axe binaries embed a complete CPython
+and every wheel (~45–60 MB) and leave a cached installation on disk, where
+PyInstaller prunes to just what the app imports.
+
 ## Execution
 
 Projects are executed using `execve` on non-Windows systems, replacing the
