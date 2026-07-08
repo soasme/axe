@@ -25,6 +25,23 @@ func appCommand(c *config, install string, args []string) ([]string, error) {
 	return nil, fmt.Errorf("unknown entrypoint kind %q", c.Entrypoint.Kind)
 }
 
+// isolatedEnv replicates `python -I` for entrypoints the interpreter flag
+// cannot reach (console scripts run the venv python via their shebang):
+// every PYTHON* variable is dropped (-E), then user site-packages and
+// script-dir sys.path prepending are disabled (-s, -P). Module and spec
+// entrypoints pass -I too, which subsumes all of this.
+func isolatedEnv(env []string) []string {
+	out := make([]string, 0, len(env)+2)
+	for _, kv := range env {
+		key, _, _ := strings.Cut(kv, "=")
+		if strings.HasPrefix(strings.ToUpper(key), "PYTHON") {
+			continue
+		}
+		out = append(out, kv)
+	}
+	return append(out, "PYTHONNOUSERSITE=1", "PYTHONSAFEPATH=1")
+}
+
 // executeApp hands control to the application: process replacement on
 // non-Windows (see exec_unix.go), child process with exit-code forwarding on
 // Windows (see exec_windows.go). AXE=1 lets apps detect this install mode.
@@ -33,7 +50,7 @@ func executeApp(c *config, install string, args []string) error {
 	if err != nil {
 		return err
 	}
-	env := append(os.Environ(), "AXE=1")
+	env := append(isolatedEnv(os.Environ()), "AXE=1")
 	debugf("executing: %v", argv)
 	return execProcess(argv, env)
 }

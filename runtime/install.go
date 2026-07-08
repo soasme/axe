@@ -118,17 +118,34 @@ func extractWheels(p *payload, dest string) error {
 	return nil
 }
 
-// runUV runs uv with user configuration disabled so behavior is identical on
-// every machine.
+// installerEnv is the uv analogue of `pip --isolated`: every variable that
+// could steer uv or the embedded Python is dropped, so the bootstrap behaves
+// identically on every machine. UV_OFFLINE guarantees uv can never reach for
+// the network, even for operations where we don't pass --offline explicitly.
+func installerEnv(env []string) []string {
+	out := make([]string, 0, len(env)+2)
+	for _, kv := range env {
+		key, _, _ := strings.Cut(kv, "=")
+		upper := strings.ToUpper(key)
+		if strings.HasPrefix(upper, "UV_") || strings.HasPrefix(upper, "PIP_") ||
+			strings.HasPrefix(upper, "PYTHON") ||
+			upper == "VIRTUAL_ENV" || upper == "CONDA_PREFIX" {
+			continue
+		}
+		out = append(out, kv)
+	}
+	return append(out, "UV_NO_CONFIG=1", "UV_OFFLINE=1")
+}
+
+// runUV runs uv with user configuration and environment influence disabled
+// so behavior is identical on every machine.
 func runUV(uv string, args ...string) error {
 	if os.Getenv("AXE_DEBUG") == "" {
 		args = append(args, "--quiet")
 	}
 	debugf("running: %s %v", uv, args)
 	cmd := exec.Command(uv, args...)
-	// UV_OFFLINE guarantees uv can never reach for the network, even for
-	// operations where we don't pass --offline explicitly.
-	cmd.Env = append(os.Environ(), "UV_NO_CONFIG=1", "UV_OFFLINE=1")
+	cmd.Env = installerEnv(os.Environ())
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
 	return cmd.Run()

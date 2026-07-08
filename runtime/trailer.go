@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -86,7 +87,8 @@ func (p *payload) configBytes() ([]byte, error) {
 	return p.readAll("config.json")
 }
 
-// wheelNames lists the payload's wheels/ entries.
+// wheelNames lists the payload's wheels/ entries, sorted so extraction order
+// never depends on how the payload was assembled.
 func (p *payload) wheelNames() []string {
 	var names []string
 	for _, f := range p.zip.File {
@@ -94,5 +96,6 @@ func (p *payload) wheelNames() []string {
 			names = append(names, f.Name)
 		}
 	}
+	slices.Sort(names)
 	return names
 }
