@@ -1,8 +1,7 @@
 # Runtime behavior
 
 Axe's runtime behavior is rewritten in Go: everything the app needs
-is embedded in the binary, so every network-dependent branch of
-pyapp's flow disappears.
+is embedded in the binary.
 
 ## Initialization
 
