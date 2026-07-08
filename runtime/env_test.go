@@ -25,6 +25,18 @@ func TestIsolatedEnv(t *testing.T) {
 	}
 }
 
+func TestAppEnvDropsInheritedAXE(t *testing.T) {
+	env := appEnv([]string{"AXE=0", "axe=no", "PATH=/usr/bin"})
+	if !slices.Contains(env, "AXE=1") {
+		t.Errorf("missing AXE=1 in %v", env)
+	}
+	for _, kv := range []string{"AXE=0", "axe=no"} {
+		if slices.Contains(env, kv) {
+			t.Errorf("inherited %s survived: %v", kv, env)
+		}
+	}
+}
+
 func TestInstallerEnv(t *testing.T) {
 	env := installerEnv([]string{
 		"PATH=/usr/bin",

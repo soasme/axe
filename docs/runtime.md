@@ -66,8 +66,9 @@ pyapp's conditions that axe resolves at *build* time instead of runtime:
 
 ## Execution
 
-Projects are executed using `execvp` on non-Windows systems, replacing the
-process. On Windows the app runs as a child process and its exit code is
+Projects are executed using `execve` on non-Windows systems, replacing the
+process (the entrypoint path is already fully resolved, so no PATH lookup is
+involved). On Windows the app runs as a child process and its exit code is
 forwarded.
 
 To provide consistent behavior on each user's machine:

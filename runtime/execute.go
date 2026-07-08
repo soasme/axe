@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -42,6 +43,17 @@ func isolatedEnv(env []string) []string {
 	return append(out, "PYTHONNOUSERSITE=1", "PYTHONSAFEPATH=1")
 }
 
+// appEnv is the environment handed to the application: Python isolation
+// plus the canonical AXE=1 marker. Any inherited AXE value is dropped first —
+// duplicate entries would let a user-set AXE=0 win on some platforms.
+func appEnv(env []string) []string {
+	out := slices.DeleteFunc(isolatedEnv(env), func(kv string) bool {
+		key, _, _ := strings.Cut(kv, "=")
+		return strings.EqualFold(key, "AXE")
+	})
+	return append(out, "AXE=1")
+}
+
 // executeApp hands control to the application: process replacement on
 // non-Windows (see exec_unix.go), child process with exit-code forwarding on
 // Windows (see exec_windows.go). AXE=1 lets apps detect this install mode.
@@ -50,7 +62,7 @@ func executeApp(c *config, install string, args []string) error {
 	if err != nil {
 		return err
 	}
-	env := append(isolatedEnv(os.Environ()), "AXE=1")
+	env := appEnv(os.Environ())
 	debugf("executing: %v", argv)
 	return execProcess(argv, env)
 }
