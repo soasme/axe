@@ -14,9 +14,7 @@ def normal_level():
 
 
 def test_returns_stdout():
-    out = run_tool(
-        [sys.executable, "-c", "print('hello')"], what="test tool", timeout=30
-    )
+    out = run_tool([sys.executable, "-c", "print('hello')"], what="test tool", timeout=30)
     assert out.strip() == "hello"
 
 

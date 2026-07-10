@@ -80,9 +80,7 @@ expose = "all"
 
 def test_no_entrypoint_errors(tmp_path):
     with pytest.raises(ConfigError, match="no entrypoint"):
-        load_config(
-            write_pyproject(tmp_path, '[project]\nname = "demo"\nversion = "0.1.0"\n')
-        )
+        load_config(write_pyproject(tmp_path, '[project]\nname = "demo"\nversion = "0.1.0"\n'))
 
 
 def test_ambiguous_scripts_error(tmp_path):

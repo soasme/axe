@@ -51,14 +51,14 @@ def test_compose_layout(artifacts):
 
 
 def test_fingerprint_changes_with_content(artifacts, tmp_path):
-    first = json.loads(
-        zipfile.ZipFile(io.BytesIO(compose(artifacts))).read("config.json")
-    )["fingerprint"]
+    first = json.loads(zipfile.ZipFile(io.BytesIO(compose(artifacts))).read("config.json"))[
+        "fingerprint"
+    ]
     uv, python, dep = artifacts
     dep.write_bytes(b"PK six CHANGED")
-    second = json.loads(
-        zipfile.ZipFile(io.BytesIO(compose(artifacts))).read("config.json")
-    )["fingerprint"]
+    second = json.loads(zipfile.ZipFile(io.BytesIO(compose(artifacts))).read("config.json"))[
+        "fingerprint"
+    ]
     assert first != second
 
 

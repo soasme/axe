@@ -102,9 +102,7 @@ def build(
             uv_path = fetch_uv(config.uv_version, goos, goarch)
 
             output.progress(f"{target}: resolving dependencies...")
-            requirements = compile_requirements(
-                uv, project_dir, goos, goarch, python_version
-            )
+            requirements = compile_requirements(uv, project_dir, goos, goarch, python_version)
             if count := pinned_count(requirements):
                 output.progress(f"{target}: downloading {count} dependency wheels...")
             dep_wheels = download_wheels(

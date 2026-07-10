@@ -1,0 +1,36 @@
+name: Docs
+
+# Builds the Sphinx docs (docs/ Markdown, shibuya theme) on every push to
+# main and publishes the HTML to the gh-pages branch, served at
+# https://soasme.github.io/axe/ (Settings -> Pages -> deploy from gh-pages).
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-deploy
+  cancel-in-progress: false
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build docs
+        run: uv run --group docs sphinx-build -W --keep-going docs docs/_build/html
+
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/_build/html

@@ -126,6 +126,4 @@ def resolve_python(python_version: str, release: str, goos: str, goarch: str) ->
 def fetch_python(artifact: str, release: str) -> Path:
     sha256 = _pbs_checksums(release)[artifact]
     url = f"{PBS_RELEASES}/{release}/{artifact}"
-    return _fetch_verified(
-        url, cache_dir() / "artifacts" / "python" / release / artifact, sha256
-    )
+    return _fetch_verified(url, cache_dir() / "artifacts" / "python" / release / artifact, sha256)

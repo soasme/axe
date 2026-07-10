@@ -97,10 +97,7 @@ def download_wheels(
             cmd,
             what=f"downloading dependency wheels for {goos}/{goarch}",
             timeout=DOWNLOAD_TIMEOUT,
-            hint=(
-                "A dependency may not publish wheels for that platform. "
-                + NETWORK_HINT
-            ),
+            hint=("A dependency may not publish wheels for that platform. " + NETWORK_HINT),
         )
     finally:
         Path(reqs_path).unlink(missing_ok=True)

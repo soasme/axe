@@ -19,7 +19,9 @@ GOOD_WHEEL = make_wheel(
     {
         "demo/__init__.py": "def main(): ...",
         "demo-1.0.dist-info/METADATA": "Name: demo",
-        "demo-1.0.dist-info/entry_points.txt": "[console_scripts]\ndemo = demo:main\nDemo-Alt = demo:alt\n",
+        "demo-1.0.dist-info/entry_points.txt": (
+            "[console_scripts]\ndemo = demo:main\nDemo-Alt = demo:alt\n"
+        ),
     }
 )
 
