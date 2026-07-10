@@ -1,0 +1,68 @@
+name: Binaries
+
+# Pushing a tag like v0.1.0 builds axe itself into single-file binaries for
+# every supported platform (axe dogfooding its own `build --all-platforms`)
+# and publishes them as downloadable assets on the GitHub release for that
+# tag. Use the manual trigger to (re)build binaries for an existing tag.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build binaries for (e.g. v0.3.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  binaries:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag || github.ref_name }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check tag matches package version
+        run: |
+          version="$(uv version --short)"
+          if [ "${TAG}" != "v${version}" ]; then
+            echo "tag ${TAG} does not match pyproject version ${version}" >&2
+            exit 1
+          fi
+
+      - name: Build runtime stubs (all platforms)
+        run: python scripts/build_stubs.py
+
+      - name: Build axe binaries (all platforms)
+        run: uv run axe build . --all-platforms -o dist/bin
+
+      - name: Generate checksums
+        working-directory: dist/bin
+        run: sha256sum * > SHA256SUMS
+
+      - name: Create release and upload binaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            gh release upload "${TAG}" dist/bin/* --clobber --repo "${GITHUB_REPOSITORY}"
+          else
+            gh release create "${TAG}" dist/bin/* \
+              --verify-tag \
+              --title "${TAG}" \
+              --generate-notes \
+              --repo "${GITHUB_REPOSITORY}"
+          fi
