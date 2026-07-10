@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+### Enhancements
+
+- Run apps in Python isolated mode for every entrypoint kind: console-script
+  entrypoints now strip `PYTHON*` variables and disable user site-packages,
+  matching what `-I` already did for module and spec entrypoints
+- Isolate the first-run bootstrap from the user's environment: `UV_*`,
+  `PIP_*`, `PYTHON*`, `VIRTUAL_ENV`, and `CONDA_PREFIX` no longer influence
+  uv during installation (the uv analogue of `pip --isolated`)
+- Install embedded wheels in a deterministic (sorted) order
+
+### Documentation
+
+- Document the runtime flow in `docs/runtime.md`, mirroring pyapp's runtime
+  behavior page with axe's offline-specialized flowchart
+
 ## 0.2.1
 
 ### Enhancements

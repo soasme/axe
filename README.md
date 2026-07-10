@@ -65,6 +65,11 @@ keyed by payload fingerprint, so a new binary version gets a fresh
 environment automatically. Subsequent runs are a single existence check, then
 `execvp` straight into your app.
 
+The full runtime flow — and how it maps onto pyapp's — is documented in
+[`docs/runtime.md`](docs/runtime.md). Apps run in Python's isolated mode, so
+the user's `PYTHONPATH`, user site-packages, and uv/pip configuration never
+leak in.
+
 Because dependencies are shipped as wheels, every dependency must publish a
 wheel for each target platform (pure-Python wheels cover all of them).
 Binaries weigh roughly 45–60 MB — that's a complete CPython plus uv; disk is
