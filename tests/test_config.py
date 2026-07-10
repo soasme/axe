@@ -124,6 +124,80 @@ def test_missing_pyproject(tmp_path):
         load_config(tmp_path)
 
 
+def test_self_command_group_default(tmp_path):
+    config = load_config(
+        write_pyproject(
+            tmp_path,
+            """
+[project]
+name = "demo"
+version = "0.1.0"
+
+[project.scripts]
+demo = "demo:main"
+""",
+        )
+    )
+    assert config.self_command_group is True
+    assert config.runtime_config("3.12")["self_command_group"] is True
+
+
+def test_self_command_group_disabled(tmp_path):
+    config = load_config(
+        write_pyproject(
+            tmp_path,
+            """
+[project]
+name = "demo"
+version = "0.1.0"
+
+[tool.axe]
+entrypoint = "demo"
+self-command-group = false
+""",
+        )
+    )
+    assert config.self_command_group is False
+    assert config.runtime_config("3.12")["self_command_group"] is False
+
+
+def test_self_command_group_bad_value(tmp_path):
+    with pytest.raises(ConfigError, match="self-command-group must be a boolean"):
+        load_config(
+            write_pyproject(
+                tmp_path,
+                """
+[project]
+name = "demo"
+version = "0.1.0"
+
+[tool.axe]
+entrypoint = "demo"
+self-command-group = "no"
+""",
+            )
+        )
+
+
+def test_self_command_group_disabled_conflicts_with_expose(tmp_path):
+    with pytest.raises(ConfigError, match="expose requires the self command group"):
+        load_config(
+            write_pyproject(
+                tmp_path,
+                """
+[project]
+name = "demo"
+version = "0.1.0"
+
+[tool.axe]
+entrypoint = "demo"
+self-command-group = false
+expose = ["metadata"]
+""",
+            )
+        )
+
+
 @pytest.mark.parametrize(
     ("value", "kind", "parsed"),
     [

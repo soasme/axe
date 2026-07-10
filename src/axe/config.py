@@ -34,6 +34,7 @@ class BuildConfig:
     uv_version: str = DEFAULT_UV_VERSION
     python_release: str = DEFAULT_PYTHON_RELEASE
     expose: list[str] = field(default_factory=list)
+    self_command_group: bool = True
 
     def runtime_config(self, resolved_python: str) -> dict:
         """The JSON document embedded in built binaries; payload.compose adds
@@ -45,6 +46,7 @@ class BuildConfig:
             "python_version": resolved_python,
             "uv_version": self.uv_version,
             "expose": self.expose,
+            "self_command_group": self.self_command_group,
         }
 
 
@@ -121,6 +123,15 @@ def load_config(project_dir: Path) -> BuildConfig:
                 f"unknown expose command {command!r}; valid: {', '.join(EXPOSABLE_COMMANDS)}"
             )
 
+    self_command_group = axe.get("self-command-group", True)
+    if not isinstance(self_command_group, bool):
+        raise ConfigError("self-command-group must be a boolean")
+    if not self_command_group and expose:
+        raise ConfigError(
+            "expose requires the self command group; remove expose or "
+            "re-enable self-command-group in [tool.axe]"
+        )
+
     return BuildConfig(
         name=name,
         version=str(version),
@@ -129,4 +140,5 @@ def load_config(project_dir: Path) -> BuildConfig:
         uv_version=str(axe.get("uv-version", DEFAULT_UV_VERSION)),
         python_release=str(axe.get("python-release", DEFAULT_PYTHON_RELEASE)),
         expose=list(expose),
+        self_command_group=self_command_group,
     )

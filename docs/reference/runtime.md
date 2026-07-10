@@ -8,7 +8,10 @@ see [runtime internals](../runtime.md).
 ## `self` commands
 
 Built binaries reserve exactly one command group, `self`; every other
-invocation is passed untouched to your app.
+invocation is passed untouched to your app. (Even that reservation is
+optional: building with
+[`self-command-group = false`](configuration.md#self-command-group)
+produces binaries with no `self` group at all.)
 
 Always available:
 

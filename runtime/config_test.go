@@ -35,6 +35,26 @@ func TestParseConfig(t *testing.T) {
 	}
 }
 
+func TestSelfEnabled(t *testing.T) {
+	c, err := parseConfig([]byte(validConfig))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !c.selfEnabled() {
+		t.Error("self command group should default to enabled when the key is absent")
+	}
+
+	disabled := strings.Replace(validConfig, `"expose": ["python-path"],`,
+		`"expose": [], "self_command_group": false,`, 1)
+	c, err = parseConfig([]byte(disabled))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.selfEnabled() {
+		t.Error("self command group should be disabled when the key is false")
+	}
+}
+
 func TestParseConfigMissingField(t *testing.T) {
 	broken := strings.Replace(validConfig, `"fingerprint": "abcdef0123456789",`, "", 1)
 	if _, err := parseConfig([]byte(broken)); err == nil {

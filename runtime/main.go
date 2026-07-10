@@ -25,7 +25,7 @@ func main() {
 	}
 
 	args := os.Args[1:]
-	if len(args) > 0 && args[0] == "self" {
+	if len(args) > 0 && args[0] == "self" && c.selfEnabled() {
 		if err := runSelf(c, p, args[1:]); err != nil {
 			fatalf("%v", err)
 		}
