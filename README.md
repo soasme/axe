@@ -130,4 +130,4 @@ $ cd runtime && go test ./...     # runtime unit tests
 $ uv build                        # the wheel, stubs included
 ```
 
-Design doc: `docs/superpowers/specs/2026-07-07-axe-design.md`.
+Runtime behavior is documented in [`docs/runtime.md`](docs/runtime.md).

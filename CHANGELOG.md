@@ -1,21 +1,31 @@
 # Changelog
 
-## Unreleased
+## 0.3.0
 
-### Enhancements
+### Behavior changes
+
+Binaries must be rebuilt with `axe build` to pick these up; binaries built
+with earlier releases keep their old behavior.
 
 - Run apps in Python isolated mode for every entrypoint kind: console-script
   entrypoints now strip `PYTHON*` variables and disable user site-packages,
-  matching what `-I` already did for module and spec entrypoints
+  matching what `-I` already did for module and spec entrypoints. Apps that
+  relied on inheriting `PYTHONPATH` or other `PYTHON*` variables will no
+  longer see them
 - Isolate the first-run bootstrap from the user's environment: `UV_*`,
   `PIP_*`, `PYTHON*`, `VIRTUAL_ENV`, and `CONDA_PREFIX` no longer influence
   uv during installation (the uv analogue of `pip --isolated`)
+
+### Enhancements
+
+- Guarantee `AXE=1` in the app's environment even if an `AXE` variable was
+  inherited from the user's shell
 - Install embedded wheels in a deterministic (sorted) order
 
 ### Documentation
 
-- Document the runtime flow in `docs/runtime.md`, mirroring pyapp's runtime
-  behavior page with axe's offline-specialized flowchart
+- Document the runtime flow in `docs/runtime.md`, including how it maps onto
+  pyapp's and how it differs from PyInstaller's
 
 ## 0.2.1
 
