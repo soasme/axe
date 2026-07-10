@@ -96,6 +96,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#uv-version"><code class="docutils literal notranslate"><span class="pre">uv-version</span></code></a></li>
 <li><a class="reference internal" href="#python-release"><code class="docutils literal notranslate"><span class="pre">python-release</span></code></a></li>
 <li><a class="reference internal" href="#expose"><code class="docutils literal notranslate"><span class="pre">expose</span></code></a></li>
+<li><a class="reference internal" href="#self-command-group"><code class="docutils literal notranslate"><span class="pre">self-command-group</span></code></a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
@@ -137,6 +138,7 @@ derived from <code class="docutils literal notranslate"><span class="pre">[proje
 </span><span data-line="4"><span class="n">uv-version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;0.10.6&quot;</span><span class="w">         </span><span class="c1"># uv embedded into the binary</span>
 </span><span data-line="5"><span class="n">python-release</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;20260623&quot;</span><span class="w">   </span><span class="c1"># python-build-standalone release tag</span>
 </span><span data-line="6"><span class="n">expose</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span><span class="w">         </span><span class="c1"># extra `self` commands, or &quot;all&quot;</span>
+</span><span data-line="7"><span class="n">self-command-group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="w">     </span><span class="c1"># false: don&#39;t reserve `self` at all</span>
 </span></pre></div>
 </div>
 <section id="required-project-metadata">
@@ -222,6 +224,17 @@ always-available <code class="docutils literal notranslate"><span class="pre">re
 <p>or the string <code class="docutils literal notranslate"><span class="pre">&quot;all&quot;</span></code> for all four. See the
 <a class="reference internal" href="runtime.html#self-commands"><span class="std std-ref">runtime reference</span></a> for what each command does.</p>
 <p><strong>Default:</strong> none — a minimal management surface for end users.</p>
+</section>
+<section id="self-command-group">
+<h2><code class="docutils literal notranslate"><span class="pre">self-command-group</span></code><a class="headerlink" href="#self-command-group" title="Link to this heading">#</a></h2>
+<p>Set to <code class="docutils literal notranslate"><span class="pre">false</span></code> and built binaries won’t reserve the <code class="docutils literal notranslate"><span class="pre">self</span></code> command group at
+all — <code class="docutils literal notranslate"><span class="pre">myapp</span> <span class="pre">self</span> <span class="pre">…</span></code> is passed to your app like any other arguments. Use it
+when your CLI has its own <code class="docutils literal notranslate"><span class="pre">self</span></code> subcommand.</p>
+<p>Combining <code class="docutils literal notranslate"><span class="pre">false</span></code> with <code class="docutils literal notranslate"><span class="pre">expose</span></code> is a configuration error, since the exposed
+commands would be unreachable.</p>
+<p><strong>Default:</strong> <code class="docutils literal notranslate"><span class="pre">true</span></code> — binaries get <code class="docutils literal notranslate"><span class="pre">self</span> <span class="pre">remove</span></code>, <code class="docutils literal notranslate"><span class="pre">self</span> <span class="pre">restore</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">self</span> <span class="pre">update</span></code>. Without them, the only way to manage an installation is
+deleting its <a class="reference internal" href="runtime.html#install-locations"><span class="std std-ref">install directory</span></a> by hand.</p>
 </section>
 </section>
 

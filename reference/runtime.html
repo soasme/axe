@@ -133,7 +133,10 @@ see <a class="reference internal" href="../runtime.html"><span class="std std-do
 <section id="self-commands">
 <h2><code class="docutils literal notranslate"><span class="pre">self</span></code> commands<a class="headerlink" href="#self-commands" title="Link to this heading">#</a></h2>
 <p>Built binaries reserve exactly one command group, <code class="docutils literal notranslate"><span class="pre">self</span></code>; every other
-invocation is passed untouched to your app.</p>
+invocation is passed untouched to your app. (Even that reservation is
+optional: building with
+<a class="reference internal" href="configuration.html#self-command-group"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">self-command-group</span> <span class="pre">=</span> <span class="pre">false</span></code></span></a>
+produces binaries with no <code class="docutils literal notranslate"><span class="pre">self</span></code> group at all.)</p>
 <p>Always available:</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">

@@ -172,7 +172,9 @@ and installs the app with <code class="docutils literal notranslate"><span class
 contains no network code at all.</p></li>
 <li><p><strong>Execute / manage</strong> — <code class="docutils literal notranslate"><span class="pre">self</span></code> is the reserved management command group
 (<code class="docutils literal notranslate"><span class="pre">remove</span></code>, <code class="docutils literal notranslate"><span class="pre">restore</span></code>, <code class="docutils literal notranslate"><span class="pre">update</span></code> always; <code class="docutils literal notranslate"><span class="pre">python</span></code>, <code class="docutils literal notranslate"><span class="pre">python-path</span></code>, <code class="docutils literal notranslate"><span class="pre">cache</span></code>,
-<code class="docutils literal notranslate"><span class="pre">metadata</span></code> when exposed at build time); everything else goes to the app.</p></li>
+<code class="docutils literal notranslate"><span class="pre">metadata</span></code> when exposed at build time); everything else goes to the app.
+Building with <code class="docutils literal notranslate"><span class="pre">self-command-group</span> <span class="pre">=</span> <span class="pre">false</span></code> drops the reservation entirely,
+so <code class="docutils literal notranslate"><span class="pre">self</span></code> reaches the app too.</p></li>
 </ul>
 <section id="differences-from-pyapp">
 <h3>Differences from pyapp<a class="headerlink" href="#differences-from-pyapp" title="Link to this heading">#</a></h3>
