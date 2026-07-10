@@ -134,18 +134,19 @@ def test_self_commands_offline(binary: Path, offline_env: dict[str, str]):
     assert "bootstrapping" not in result.stderr
 
 
-def test_self_command_group_disabled(tmp_path, offline_env: dict[str, str], monkeypatch):
-    # With AXE_ENABLE_SELF_COMMAND_GROUP=false the binary reserves nothing:
-    # `self` is just another argument for the app. The example exposes self
-    # commands, which conflicts with disabling, so build a copy without them.
+def test_self_command_group_disabled(tmp_path, offline_env: dict[str, str]):
+    # With self-command-group = false the binary reserves nothing: `self` is
+    # just another argument for the app. The example exposes self commands,
+    # which conflicts with disabling, so build a copy with expose replaced.
     project = tmp_path / "cowsay"
     shutil.copytree(COWSAY, project)
     pyproject = project / "pyproject.toml"
     body = pyproject.read_text()
     assert "[tool.axe]" in body
-    pyproject.write_text(body[: body.index("[tool.axe]")])
+    pyproject.write_text(
+        body[: body.index("[tool.axe]")] + "[tool.axe]\nself-command-group = false\n"
+    )
 
-    monkeypatch.setenv("AXE_ENABLE_SELF_COMMAND_GROUP", "false")
     (binary,) = build(project, output_dir=tmp_path / "bin")
 
     env = dict(offline_env, AXE_DATA_DIR=str(tmp_path / "data"))

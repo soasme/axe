@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import re
 import tomllib
 from dataclasses import dataclass, field
@@ -73,20 +72,6 @@ def python_from_requires(requires_python: str) -> str | None:
     return None
 
 
-def self_command_group_enabled() -> bool:
-    """Whether built binaries reserve the `self` command group, controlled by
-    the AXE_ENABLE_SELF_COMMAND_GROUP build-time environment variable."""
-    value = os.environ.get("AXE_ENABLE_SELF_COMMAND_GROUP")
-    if value is None:
-        return True
-    normalized = value.strip().lower()
-    if normalized in ("1", "true", "yes", "on"):
-        return True
-    if normalized in ("0", "false", "no", "off"):
-        return False
-    raise ConfigError(f"AXE_ENABLE_SELF_COMMAND_GROUP must be true or false, got {value!r}")
-
-
 def load_config(project_dir: Path) -> BuildConfig:
     pyproject = project_dir / "pyproject.toml"
     if not pyproject.is_file():
@@ -138,11 +123,13 @@ def load_config(project_dir: Path) -> BuildConfig:
                 f"unknown expose command {command!r}; valid: {', '.join(EXPOSABLE_COMMANDS)}"
             )
 
-    self_command_group = self_command_group_enabled()
+    self_command_group = axe.get("self-command-group", True)
+    if not isinstance(self_command_group, bool):
+        raise ConfigError("self-command-group must be a boolean")
     if not self_command_group and expose:
         raise ConfigError(
-            "expose requires the self command group; unset "
-            "AXE_ENABLE_SELF_COMMAND_GROUP or remove expose from [tool.axe]"
+            "expose requires the self command group; remove expose or "
+            "re-enable self-command-group in [tool.axe]"
         )
 
     return BuildConfig(

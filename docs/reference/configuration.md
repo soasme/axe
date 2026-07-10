@@ -11,6 +11,7 @@ python = "3.12"               # default: lower bound of requires-python
 uv-version = "0.10.6"         # uv embedded into the binary
 python-release = "20260623"   # python-build-standalone release tag
 expose = ["metadata"]         # extra `self` commands, or "all"
+self-command-group = true     # false: don't reserve `self` at all
 ```
 
 ## Required `[project]` metadata
@@ -82,17 +83,14 @@ or the string `"all"` for all four. See the
 
 **Default:** none — a minimal management surface for end users.
 
-## `AXE_ENABLE_SELF_COMMAND_GROUP`
+## `self-command-group`
 
-One build-time setting lives in the environment rather than
-`pyproject.toml`: set `AXE_ENABLE_SELF_COMMAND_GROUP=false` when running
-`axe build` and the binaries won't reserve the `self` command group at all —
-`myapp self …` is passed to your app like any other arguments. Use it when
-your CLI has its own `self` subcommand.
+Set to `false` and built binaries won't reserve the `self` command group at
+all — `myapp self …` is passed to your app like any other arguments. Use it
+when your CLI has its own `self` subcommand.
 
-Accepted values: `true`/`false`, `1`/`0`, `yes`/`no`, `on`/`off`
-(case-insensitive). Combining `false` with `expose` is a configuration
-error, since the exposed commands would be unreachable.
+Combining `false` with `expose` is a configuration error, since the exposed
+commands would be unreachable.
 
 **Default:** `true` — binaries get `self remove`, `self restore`, and
 `self update`. Without them, the only way to manage an installation is

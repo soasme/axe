@@ -4,9 +4,9 @@
 
 ### Enhancements
 
-- Make the reserved `self` command group optional: build with
-  `AXE_ENABLE_SELF_COMMAND_GROUP=false` and the binary passes `self` to the
-  app like any other argument (for CLIs that have their own `self`
+- Make the reserved `self` command group optional: set
+  `self-command-group = false` in `[tool.axe]` and the binary passes `self`
+  to the app like any other argument (for CLIs that have their own `self`
   subcommand). Combining it with `expose` is a configuration error
 
 ## 0.3.0

@@ -105,6 +105,7 @@ uv-version = "0.10.6"         # uv embedded into the binary
 python-release = "20260623"   # python-build-standalone release tag
 expose = ["metadata"]         # extra `self` commands: python, python-path,
                               # cache, metadata — or "all"
+self-command-group = true     # false: don't reserve `self` at all
 ```
 
 ## CLI
@@ -132,9 +133,9 @@ $ myapp self restore   # wipe and reinstall
 $ myapp self update    # reinstall from the embedded payload
 ```
 
-If your CLI needs `self` for itself, build with
-`AXE_ENABLE_SELF_COMMAND_GROUP=false` and the binary reserves nothing —
-`self` reaches your app like any other argument.
+If your CLI needs `self` for itself, set `self-command-group = false` in
+`[tool.axe]` and the binary reserves nothing — `self` reaches your app like
+any other argument.
 
 `AXE=1` is set in your app's environment so it can detect axe installs, and
 `AXE_DEBUG=1` makes the stub verbose.
