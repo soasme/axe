@@ -38,7 +38,10 @@ For each target platform, `axe build`:
 
 All downloads are checksum-verified and cached on the build machine, so
 builds after the first take seconds. Configuration comes from
-`pyproject.toml` — see the [configuration reference](configuration.md).
+`pyproject.toml` — see the [configuration reference](configuration.md) —
+plus one environment variable:
+[`AXE_ENABLE_SELF_COMMAND_GROUP=false`](configuration.md#axe_enable_self_command_group)
+builds binaries without the reserved `self` command group.
 
 Output files are named `<name>-<version>-<os>-<arch>` (plus `.exe` on
 Windows), e.g. `mycli-0.1.0-linux-amd64`.

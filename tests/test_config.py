@@ -124,6 +124,62 @@ def test_missing_pyproject(tmp_path):
         load_config(tmp_path)
 
 
+MINIMAL_PYPROJECT = """
+[project]
+name = "demo"
+version = "0.1.0"
+
+[project.scripts]
+demo = "demo:main"
+"""
+
+
+def test_self_command_group_default(tmp_path):
+    config = load_config(write_pyproject(tmp_path, MINIMAL_PYPROJECT))
+    assert config.self_command_group is True
+    assert config.runtime_config("3.12")["self_command_group"] is True
+
+
+@pytest.mark.parametrize("value", ["false", "FALSE", "0", "no", "off"])
+def test_self_command_group_disabled(tmp_path, monkeypatch, value):
+    monkeypatch.setenv("AXE_ENABLE_SELF_COMMAND_GROUP", value)
+    config = load_config(write_pyproject(tmp_path, MINIMAL_PYPROJECT))
+    assert config.self_command_group is False
+    assert config.runtime_config("3.12")["self_command_group"] is False
+
+
+@pytest.mark.parametrize("value", ["true", "1", "yes", "on"])
+def test_self_command_group_enabled_explicitly(tmp_path, monkeypatch, value):
+    monkeypatch.setenv("AXE_ENABLE_SELF_COMMAND_GROUP", value)
+    config = load_config(write_pyproject(tmp_path, MINIMAL_PYPROJECT))
+    assert config.self_command_group is True
+
+
+def test_self_command_group_bad_value(tmp_path, monkeypatch):
+    monkeypatch.setenv("AXE_ENABLE_SELF_COMMAND_GROUP", "maybe")
+    with pytest.raises(ConfigError, match="AXE_ENABLE_SELF_COMMAND_GROUP"):
+        load_config(write_pyproject(tmp_path, MINIMAL_PYPROJECT))
+
+
+def test_self_command_group_disabled_conflicts_with_expose(tmp_path, monkeypatch):
+    monkeypatch.setenv("AXE_ENABLE_SELF_COMMAND_GROUP", "false")
+    with pytest.raises(ConfigError, match="expose requires the self command group"):
+        load_config(
+            write_pyproject(
+                tmp_path,
+                """
+[project]
+name = "demo"
+version = "0.1.0"
+
+[tool.axe]
+entrypoint = "demo"
+expose = ["metadata"]
+""",
+            )
+        )
+
+
 @pytest.mark.parametrize(
     ("value", "kind", "parsed"),
     [

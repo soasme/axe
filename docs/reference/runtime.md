@@ -8,7 +8,10 @@ see [runtime internals](../runtime.md).
 ## `self` commands
 
 Built binaries reserve exactly one command group, `self`; every other
-invocation is passed untouched to your app.
+invocation is passed untouched to your app. (Even that reservation is
+optional: building with
+[`AXE_ENABLE_SELF_COMMAND_GROUP=false`](configuration.md#axe_enable_self_command_group)
+produces binaries with no `self` group at all.)
 
 Always available:
 

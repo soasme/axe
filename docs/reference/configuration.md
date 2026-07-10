@@ -81,3 +81,19 @@ or the string `"all"` for all four. See the
 [runtime reference](runtime.md#self-commands) for what each command does.
 
 **Default:** none — a minimal management surface for end users.
+
+## `AXE_ENABLE_SELF_COMMAND_GROUP`
+
+One build-time setting lives in the environment rather than
+`pyproject.toml`: set `AXE_ENABLE_SELF_COMMAND_GROUP=false` when running
+`axe build` and the binaries won't reserve the `self` command group at all —
+`myapp self …` is passed to your app like any other arguments. Use it when
+your CLI has its own `self` subcommand.
+
+Accepted values: `true`/`false`, `1`/`0`, `yes`/`no`, `on`/`off`
+(case-insensitive). Combining `false` with `expose` is a configuration
+error, since the exposed commands would be unreachable.
+
+**Default:** `true` — binaries get `self remove`, `self restore`, and
+`self update`. Without them, the only way to manage an installation is
+deleting its [install directory](runtime.md#install-locations) by hand.

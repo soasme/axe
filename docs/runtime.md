@@ -50,6 +50,8 @@ Step by step:
 - **Execute / manage** — `self` is the reserved management command group
   (`remove`, `restore`, `update` always; `python`, `python-path`, `cache`,
   `metadata` when exposed at build time); everything else goes to the app.
+  Building with `AXE_ENABLE_SELF_COMMAND_GROUP=false` drops the reservation
+  entirely, so `self` reaches the app too.
 
 ### Differences from pyapp
 

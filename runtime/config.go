@@ -21,10 +21,13 @@ type config struct {
 	PythonVersion string     `json:"python_version"`
 	UVVersion     string     `json:"uv_version"`
 	Expose        []string   `json:"expose"`
-	Fingerprint   string     `json:"fingerprint"`
-	WheelName     string     `json:"wheel_name"`
-	UVArchive     string     `json:"uv_archive"`
-	PythonArchive string     `json:"python_archive"`
+	// nil means enabled: configs written before this key existed keep the
+	// reserved `self` group.
+	SelfCommandGroup *bool  `json:"self_command_group"`
+	Fingerprint      string `json:"fingerprint"`
+	WheelName        string `json:"wheel_name"`
+	UVArchive        string `json:"uv_archive"`
+	PythonArchive    string `json:"python_archive"`
 }
 
 func parseConfig(data []byte) (*config, error) {
@@ -52,4 +55,8 @@ func parseConfig(data []byte) (*config, error) {
 
 func (c *config) exposed(command string) bool {
 	return slices.Contains(c.Expose, command)
+}
+
+func (c *config) selfEnabled() bool {
+	return c.SelfCommandGroup == nil || *c.SelfCommandGroup
 }
