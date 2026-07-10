@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Tutorial: release binaries from GitHub Actions - axe 0.3.0</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="CLI reference" href="../reference/cli.html" /><link rel="prev" title="Tutorial: package a CLI as a single binary" href="first-binary.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=70423902" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    
+  <meta property="og:type" content="website"/><meta property="og:title" content="Tutorial: release binaries from GitHub Actions"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>axe</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link">
+          <a href="https://pypi.org/project/axe/">
+            <span>PyPI</span></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/soasme/axe" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="first-binary.html">Tutorial: package a CLI as a single binary</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial: release binaries from GitHub Actions</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/configuration.html">Configuration reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/runtime.html">Runtime reference</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Internals</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../runtime.html">Runtime behavior</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#the-workflow">The workflow</a></li>
+<li><a class="reference internal" href="#tag-and-release">Tag and release</a></li>
+<li><a class="reference internal" href="#guard-against-tag-version-drift">Guard against tag/version drift</a></li>
+<li><a class="reference internal" href="#variations">Variations</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">axe</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Tutorial: release binaries from GitHub Actions</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="tutorial-release-binaries-from-github-actions">
+<h1>Tutorial: release binaries from GitHub Actions<a class="headerlink" href="#tutorial-release-binaries-from-github-actions" title="Link to this heading">#</a></h1>
+<p>Because axe cross-builds from any machine, one cheap Linux runner can
+produce the binaries for every supported platform — no build matrix, no
+macOS or Windows runners. This tutorial wires that into a workflow that
+attaches binaries to a GitHub release whenever you push a version tag.</p>
+<p>It assumes your project already builds locally with <code class="docutils literal notranslate"><span class="pre">axe</span> <span class="pre">build</span></code> (if not,
+start with <a class="reference internal" href="first-binary.html"><span class="std std-doc">the first tutorial</span></a>) and that axe is in your
+dev dependencies (<code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">add</span> <span class="pre">--dev</span> <span class="pre">axe</span></code>).</p>
+<section id="the-workflow">
+<h2>The workflow<a class="headerlink" href="#the-workflow" title="Link to this heading">#</a></h2>
+<p>Create <code class="docutils literal notranslate"><span class="pre">.github/workflows/release-binaries.yml</span></code>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Release binaries</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="nt">on</span><span class="p">:</span>
+</span><span data-line="4"><span class="w">  </span><span class="nt">push</span><span class="p">:</span>
+</span><span data-line="5"><span class="w">    </span><span class="nt">tags</span><span class="p">:</span>
+</span><span data-line="6"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;v*&quot;</span>
+</span><span data-line="7">
+</span><span data-line="8"><span class="nt">permissions</span><span class="p">:</span>
+</span><span data-line="9"><span class="w">  </span><span class="nt">contents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">write</span><span class="w">   </span><span class="c1"># create the release and upload assets</span>
+</span><span data-line="10">
+</span><span data-line="11"><span class="nt">jobs</span><span class="p">:</span>
+</span><span data-line="12"><span class="w">  </span><span class="nt">binaries</span><span class="p">:</span>
+</span><span data-line="13"><span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+</span><span data-line="14"><span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+</span><span data-line="15"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+</span><span data-line="16">
+</span><span data-line="17"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">astral-sh/setup-uv@v5</span>
+</span><span data-line="18">
+</span><span data-line="19"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Build binaries for all platforms</span>
+</span><span data-line="20"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uv run axe build --all-platforms</span>
+</span><span data-line="21">
+</span><span data-line="22"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Generate checksums</span>
+</span><span data-line="23"><span class="w">        </span><span class="nt">working-directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dist/bin</span>
+</span><span data-line="24"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sha256sum * &gt; SHA256SUMS</span>
+</span><span data-line="25">
+</span><span data-line="26"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create release and upload binaries</span>
+</span><span data-line="27"><span class="w">        </span><span class="nt">env</span><span class="p">:</span>
+</span><span data-line="28"><span class="w">          </span><span class="nt">GH_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ github.token }}</span>
+</span><span data-line="29"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+</span><span data-line="30"><span class="w">          </span><span class="no">gh release create &quot;${GITHUB_REF_NAME}&quot; dist/bin/* \</span>
+</span><span data-line="31"><span class="w">            </span><span class="no">--verify-tag \</span>
+</span><span data-line="32"><span class="w">            </span><span class="no">--title &quot;${GITHUB_REF_NAME}&quot; \</span>
+</span><span data-line="33"><span class="w">            </span><span class="no">--generate-notes</span>
+</span></pre></div>
+</div>
+<p>That’s the whole thing. Note what’s <em>absent</em>: no Go setup (axe’s wheel ships
+precompiled runtime stubs), no matrix over operating systems, and no caching
+configuration to get right — a cold build fetches CPython, uv, and the
+dependency wheels once, checksum-verified.</p>
+</section>
+<section id="tag-and-release">
+<h2>Tag and release<a class="headerlink" href="#tag-and-release" title="Link to this heading">#</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">$ </span>git<span class="w"> </span>tag<span class="w"> </span>v0.1.0
+</span><span data-line="2"><span class="gp">$ </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v0.1.0
+</span></pre></div>
+</div>
+<p>A few minutes later the <code class="docutils literal notranslate"><span class="pre">v0.1.0</span></code> release carries one binary per platform
+plus a <code class="docutils literal notranslate"><span class="pre">SHA256SUMS</span></code> file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">greet</span><span class="o">-</span><span class="mf">0.1.0</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">amd64</span>
+</span><span data-line="2"><span class="n">greet</span><span class="o">-</span><span class="mf">0.1.0</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">arm64</span>
+</span><span data-line="3"><span class="n">greet</span><span class="o">-</span><span class="mf">0.1.0</span><span class="o">-</span><span class="n">darwin</span><span class="o">-</span><span class="n">amd64</span>
+</span><span data-line="4"><span class="n">greet</span><span class="o">-</span><span class="mf">0.1.0</span><span class="o">-</span><span class="n">darwin</span><span class="o">-</span><span class="n">arm64</span>
+</span><span data-line="5"><span class="n">greet</span><span class="o">-</span><span class="mf">0.1.0</span><span class="o">-</span><span class="n">windows</span><span class="o">-</span><span class="n">amd64</span><span class="o">.</span><span class="n">exe</span>
+</span><span data-line="6"><span class="n">SHA256SUMS</span>
+</span></pre></div>
+</div>
+<p>Users download one file and run it. Nothing to install, nothing else to
+download — the binary works offline from the first run.</p>
+</section>
+<section id="guard-against-tag-version-drift">
+<h2>Guard against tag/version drift<a class="headerlink" href="#guard-against-tag-version-drift" title="Link to this heading">#</a></h2>
+<p>A tag that doesn’t match <code class="docutils literal notranslate"><span class="pre">[project]</span> <span class="pre">version</span></code> produces confusingly-named
+binaries. Fail fast by inserting this step before the build:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Check tag matches package version</span>
+</span><span data-line="2"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+</span><span data-line="3"><span class="w">          </span><span class="no">version=&quot;$(uv version --short)&quot;</span>
+</span><span data-line="4"><span class="w">          </span><span class="no">if [ &quot;${GITHUB_REF_NAME}&quot; != &quot;v${version}&quot; ]; then</span>
+</span><span data-line="5"><span class="w">            </span><span class="no">echo &quot;tag ${GITHUB_REF_NAME} does not match pyproject version ${version}&quot; &gt;&amp;2</span>
+</span><span data-line="6"><span class="w">            </span><span class="no">exit 1</span>
+</span><span data-line="7"><span class="w">          </span><span class="no">fi</span>
+</span></pre></div>
+</div>
+</section>
+<section id="variations">
+<h2>Variations<a class="headerlink" href="#variations" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Build on every push</strong> (to catch packaging breakage early): trigger on
+<code class="docutils literal notranslate"><span class="pre">pull_request</span></code> and upload with <code class="docutils literal notranslate"><span class="pre">actions/upload-artifact</span></code> instead of
+<code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">release</span> <span class="pre">create</span></code>.</p></li>
+<li><p><strong>Only some platforms</strong>: replace <code class="docutils literal notranslate"><span class="pre">--all-platforms</span></code> with repeated
+<code class="docutils literal notranslate"><span class="pre">-p</span></code> flags, e.g. <code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">linux/amd64</span> <span class="pre">-p</span> <span class="pre">darwin/arm64</span></code>.</p></li>
+<li><p><strong>Rebuild an existing release</strong>: add a <code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code> trigger with a
+tag input and check out <code class="docutils literal notranslate"><span class="pre">refs/tags/${{</span> <span class="pre">inputs.tag</span> <span class="pre">}}</span></code>. Axe’s own
+<a class="reference external" href="https://github.com/soasme/axe/blob/main/.github/workflows/binaries.yml"><code class="docutils literal notranslate"><span class="pre">binaries.yml</span></code></a>
+does exactly this.</p></li>
+</ul>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="first-binary.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Tutorial: package a CLI as a single binary</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="../reference/cli.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">CLI reference</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p></p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+  <a href="https://github.com/soasme/axe" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=e259d695"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/shibuya.js?v=50760d75"></script></body>
+</html>
