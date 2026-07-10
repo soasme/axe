@@ -32,8 +32,7 @@ Hand the binary to anyone — nothing to install, nothing to download:
 
 ```console
 $ ./dist/bin/mycli-0.1.0-darwin-arm64
-setting up mycli 0.1.0 (first run)...
-done.
+[axe] bootstrapping mycli 0.1.0...
 Hello from mycli!
 
 $ ./dist/bin/mycli-0.1.0-darwin-arm64   # instant from now on

@@ -49,11 +49,10 @@ func ensureInstalled(c *config, p *payload) (string, error) {
 		return install, nil
 	}
 
-	statusf("setting up %s %s (first run)...", c.Name, c.Version)
+	statusf("[axe] bootstrapping %s %s...", c.Name, c.Version)
 	if err := bootstrap(c, p, install); err != nil {
 		return "", err
 	}
-	statusf("done.")
 	return install, nil
 }
 
