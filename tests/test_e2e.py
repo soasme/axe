@@ -77,7 +77,7 @@ def test_binary_lifecycle_offline(binary: Path, offline_env: dict[str, str]):
     result = run(binary, ["hello", "world"], offline_env)
     assert result.returncode == 0, result.stderr
     assert "< hello world >" in result.stdout
-    assert "first run" in result.stderr
+    assert "bootstrapping" in result.stderr
     # The app can detect it's running from an axe binary (AXE=1), and its
     # dependency (six) was importable, or the run would have crashed.
     assert "(running from an axe binary)" in result.stderr
@@ -90,7 +90,7 @@ def test_binary_lifecycle_offline(binary: Path, offline_env: dict[str, str]):
     result = run(binary, ["again"], offline_env, timeout=60)
     assert result.returncode == 0, result.stderr
     assert "< again >" in result.stdout
-    assert "first run" not in result.stderr
+    assert "bootstrapping" not in result.stderr
 
     result = run(binary, ["self", "python-path"], offline_env, timeout=60)
     assert result.returncode == 0, result.stderr
@@ -124,14 +124,14 @@ def test_self_commands_offline(binary: Path, offline_env: dict[str, str]):
     result = run(binary, ["moo"], offline_env)
     assert result.returncode == 0, result.stderr
     assert "< moo >" in result.stdout
-    assert "first run" in result.stderr
+    assert "bootstrapping" in result.stderr
 
     # restore reinstalls in one step.
     result = run(binary, ["self", "restore"], offline_env)
     assert result.returncode == 0, result.stderr
     result = run(binary, ["back"], offline_env, timeout=60)
     assert result.returncode == 0, result.stderr
-    assert "first run" not in result.stderr
+    assert "bootstrapping" not in result.stderr
 
 
 def test_interrupted_bootstrap_recovers(binary: Path, offline_env: dict[str, str], tmp_path):
@@ -145,7 +145,7 @@ def test_interrupted_bootstrap_recovers(binary: Path, offline_env: dict[str, str
     (install / ".axe-installed").unlink()
     result = run(binary, ["rebuilt"], env)
     assert result.returncode == 0, result.stderr
-    assert "first run" in result.stderr
+    assert "bootstrapping" in result.stderr
     assert "< rebuilt >" in result.stdout
 
 
