@@ -11,3 +11,4 @@ dist/
 
 # Go
 runtime/axe-runtime*
+docs/_build/

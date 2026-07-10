@@ -40,9 +40,7 @@ def test_too_small():
 
 def test_corrupt_offsets():
     binary = bytearray(trailer.pack(b"stub", PAYLOAD))
-    binary[-trailer.TRAILER_SIZE + 8 : -trailer.TRAILER_SIZE + 16] = (1 << 40).to_bytes(
-        8, "little"
-    )
+    binary[-trailer.TRAILER_SIZE + 8 : -trailer.TRAILER_SIZE + 16] = (1 << 40).to_bytes(8, "little")
     with pytest.raises(trailer.TrailerError):
         trailer.unpack(bytes(binary))
 

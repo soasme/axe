@@ -42,9 +42,7 @@ def console_scripts(wheel_bytes: bytes) -> set[str]:
 
 def has_module(wheel_bytes: bytes, module: str) -> bool:
     top = module.split(".")[0]
-    return any(
-        name == f"{top}.py" or name.startswith(f"{top}/") for name in _namelist(wheel_bytes)
-    )
+    return any(name == f"{top}.py" or name.startswith(f"{top}/") for name in _namelist(wheel_bytes))
 
 
 PACKAGING_HINT = (

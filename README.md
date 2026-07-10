@@ -1,5 +1,8 @@
 # Axe
 
+[![Tests](https://github.com/soasme/axe/actions/workflows/test.yml/badge.svg)](https://github.com/soasme/axe/actions/workflows/test.yml)
+[![PyPI](https://img.shields.io/pypi/v/axe)](https://pypi.org/project/axe/)
+
 Axe ships your Python app as a **fully self-contained** single-file binary —
 for every major platform, from any machine, with zero extra toolchain.
 
@@ -40,6 +43,20 @@ Hello from mycli!
 ```
 
 A fuller example lives in [`examples/cowsay`](examples/cowsay).
+
+## Documentation
+
+Browsable at [soasme.github.io/axe](https://soasme.github.io/axe/), or right
+here in the repo:
+
+- [Getting started](docs/getting-started.md) — from zero to a shippable binary
+- [Tutorial: package a CLI as a single binary](docs/tutorials/first-binary.md)
+- [Tutorial: release binaries from GitHub Actions](docs/tutorials/github-actions.md)
+- [CLI reference](docs/reference/cli.md)
+- [Configuration reference](docs/reference/configuration.md) — the `[tool.axe]` table
+- [Runtime reference](docs/reference/runtime.md) — `self` commands, environment
+  variables, install locations
+- [Runtime internals](docs/runtime.md) — how the bootstrap works under the hood
 
 ## How it works
 
@@ -128,5 +145,9 @@ $ uv run pytest                   # unit + end-to-end tests (offline-verified)
 $ cd runtime && go test ./...     # runtime unit tests
 $ uv build                        # the wheel, stubs included
 ```
+
+Lint and formatting are enforced by [pre-commit](https://pre-commit.com)
+(ruff check + format); install the hooks once with `uvx pre-commit install`.
+CI runs the same hooks plus both test suites on every pull request.
 
 Runtime behavior is documented in [`docs/runtime.md`](docs/runtime.md).

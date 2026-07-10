@@ -27,9 +27,7 @@ def make_parser() -> argparse.ArgumentParser:
     build_cmd.add_argument(
         "project", nargs="?", default=".", help="project directory (default: current)"
     )
-    build_cmd.add_argument(
-        "-o", "--output", help="output directory (default: <project>/dist/bin)"
-    )
+    build_cmd.add_argument("-o", "--output", help="output directory (default: <project>/dist/bin)")
     build_cmd.add_argument(
         "-p",
         "--platform",
@@ -41,9 +39,7 @@ def make_parser() -> argparse.ArgumentParser:
         "--all-platforms", action="store_true", help="build for every supported platform"
     )
     verbosity = build_cmd.add_mutually_exclusive_group()
-    verbosity.add_argument(
-        "-q", "--quiet", action="store_true", help="print nothing but errors"
-    )
+    verbosity.add_argument("-q", "--quiet", action="store_true", help="print nothing but errors")
     verbosity.add_argument(
         "-v",
         "--verbose",
