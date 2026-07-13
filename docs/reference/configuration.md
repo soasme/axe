@@ -86,8 +86,11 @@ python-build-standalone-releases-url = "https://mirror.corp/astral-sh/python-bui
 
 The mirror must serve the same layout as the GitHub release download URLs;
 axe appends `/<release tag>/<artifact filename>` (plus `.sha256` and
-`SHA256SUMS` checksum files) to the configured base. Downloads stay
-checksum-verified, so a tampered mirror fails the build.
+`SHA256SUMS` checksum files) to the configured base. Downloads are still
+checksum-verified, but the checksums come from the same mirror as the
+artifacts, so this catches corruption and incomplete mirroring — it cannot
+detect a malicious mirror that serves matching tampered artifacts and
+checksum files. Only point axe at a mirror you trust as much as github.com.
 
 **Defaults:**
 
