@@ -103,6 +103,8 @@ python = "3.12"               # "3.X" picks the newest 3.X.*; "3.X.Y" pins
                               # default: lower bound of requires-python
 uv-version = "0.10.6"         # uv embedded into the binary
 python-release = "20260623"   # python-build-standalone release tag
+uv-releases-url = "https://mirror.corp/uv"    # download uv from a mirror
+python-build-standalone-releases-url = "https://mirror.corp/pbs"  # ...and CPython
 expose = ["metadata"]         # extra `self` commands: python, python-path,
                               # cache, metadata — or "all"
 self-command-group = true     # false: don't reserve `self` at all
