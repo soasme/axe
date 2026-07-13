@@ -95,6 +95,10 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#python"><code class="docutils literal notranslate"><span class="pre">python</span></code></a></li>
 <li><a class="reference internal" href="#uv-version"><code class="docutils literal notranslate"><span class="pre">uv-version</span></code></a></li>
 <li><a class="reference internal" href="#python-release"><code class="docutils literal notranslate"><span class="pre">python-release</span></code></a></li>
+<li><a class="reference internal" href="#uv-releases-url-and-python-build-standalone-releases-url"><code class="docutils literal notranslate"><span class="pre">uv-releases-url</span></code> and <code class="docutils literal notranslate"><span class="pre">python-build-standalone-releases-url</span></code></a><ul>
+<li><a class="reference internal" href="#mirror-credentials">Mirror credentials</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#expose"><code class="docutils literal notranslate"><span class="pre">expose</span></code></a></li>
 <li><a class="reference internal" href="#self-command-group"><code class="docutils literal notranslate"><span class="pre">self-command-group</span></code></a></li>
 </ul>
@@ -137,8 +141,10 @@ derived from <code class="docutils literal notranslate"><span class="pre">[proje
 </span><span data-line="3"><span class="n">python</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;3.12&quot;</span><span class="w">               </span><span class="c1"># default: lower bound of requires-python</span>
 </span><span data-line="4"><span class="n">uv-version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;0.10.6&quot;</span><span class="w">         </span><span class="c1"># uv embedded into the binary</span>
 </span><span data-line="5"><span class="n">python-release</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;20260623&quot;</span><span class="w">   </span><span class="c1"># python-build-standalone release tag</span>
-</span><span data-line="6"><span class="n">expose</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span><span class="w">         </span><span class="c1"># extra `self` commands, or &quot;all&quot;</span>
-</span><span data-line="7"><span class="n">self-command-group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="w">     </span><span class="c1"># false: don&#39;t reserve `self` at all</span>
+</span><span data-line="6"><span class="n">uv-releases-url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://mirror.corp/uv&quot;</span><span class="w">    </span><span class="c1"># mirror for uv downloads</span>
+</span><span data-line="7"><span class="n">python-build-standalone-releases-url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://mirror.corp/pbs&quot;</span><span class="w">  </span><span class="c1"># ...and CPython</span>
+</span><span data-line="8"><span class="n">expose</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span><span class="w">         </span><span class="c1"># extra `self` commands, or &quot;all&quot;</span>
+</span><span data-line="9"><span class="n">self-command-group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="w">     </span><span class="c1"># false: don&#39;t reserve `self` at all</span>
 </span></pre></div>
 </div>
 <section id="required-project-metadata">
@@ -210,6 +216,56 @@ venv and install wheels offline.</p>
 <p>The <a class="reference external" href="https://github.com/astral-sh/python-build-standalone">python-build-standalone</a>
 release tag that provides the embedded CPython.</p>
 <p><strong>Default:</strong> pinned per axe release (currently 20260623).</p>
+</section>
+<section id="uv-releases-url-and-python-build-standalone-releases-url">
+<h2><code class="docutils literal notranslate"><span class="pre">uv-releases-url</span></code> and <code class="docutils literal notranslate"><span class="pre">python-build-standalone-releases-url</span></code><a class="headerlink" href="#uv-releases-url-and-python-build-standalone-releases-url" title="Link to this heading">#</a></h2>
+<p>Where <code class="docutils literal notranslate"><span class="pre">axe</span> <span class="pre">build</span></code> downloads the uv and CPython
+(python-build-standalone) release artifacts it embeds. Point these at an
+internal mirror when the build machine can’t reach github.com — a
+network-isolated environment behind a proxy, an artifact repository like
+Artifactory or Nexus, or a plain file server.</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">[tool.axe]</span>
+</span><span data-line="2"><span class="n">uv-releases-url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://mirror.corp/astral-sh/uv/releases/download&quot;</span>
+</span><span data-line="3"><span class="n">python-build-standalone-releases-url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://mirror.corp/astral-sh/python-build-standalone/releases/download&quot;</span>
+</span></pre></div>
+</div>
+<p>The mirror must serve the same layout as the GitHub release download URLs;
+axe appends <code class="docutils literal notranslate"><span class="pre">/&lt;release</span> <span class="pre">tag&gt;/&lt;artifact</span> <span class="pre">filename&gt;</span></code> (plus <code class="docutils literal notranslate"><span class="pre">.sha256</span></code> and
+<code class="docutils literal notranslate"><span class="pre">SHA256SUMS</span></code> checksum files) to the configured base. Downloads are still
+checksum-verified, but the checksums come from the same mirror as the
+artifacts, so this catches corruption and incomplete mirroring — it cannot
+detect a malicious mirror that serves matching tampered artifacts and
+checksum files. Only point axe at a mirror you trust as much as github.com.</p>
+<p><strong>Defaults:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">https://github.com/astral-sh/uv/releases/download</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">https://github.com/astral-sh/python-build-standalone/releases/download</span></code></p></li>
+</ul>
+<section id="mirror-credentials">
+<h3>Mirror credentials<a class="headerlink" href="#mirror-credentials" title="Link to this heading">#</a></h3>
+<p>If the mirror requires HTTP Basic authentication, set credentials as
+environment variables on the build machine (never in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>,
+where they would be committed):</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Applies to</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">UV_RELEASES_USERNAME</span></code> / <code class="docutils literal notranslate"><span class="pre">UV_RELEASES_PASSWORD</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">uv-releases-url</span></code> downloads</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">PYTHON_BUILD_STANDALONE_RELEASES_USERNAME</span></code> / <code class="docutils literal notranslate"><span class="pre">PYTHON_BUILD_STANDALONE_RELEASES_PASSWORD</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python-build-standalone-releases-url</span></code> downloads</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>For token-based mirrors that ignore the username, setting just the
+password variable works (an empty username is sent).</p>
+</section>
 </section>
 <section id="expose">
 <h2><code class="docutils literal notranslate"><span class="pre">expose</span></code><a class="headerlink" href="#expose" title="Link to this heading">#</a></h2>

@@ -53,6 +53,9 @@ resolution, download, or build failures.
 - **Downloads fail or stall behind a corporate proxy** — set
   `UV_NATIVE_TLS=1` so uv uses the system trust store, and run with `-v` to
   see the underlying tool output.
+- **The build machine can't reach github.com at all** — point the uv and
+  CPython downloads at an internal mirror with
+  [`uv-releases-url` and `python-build-standalone-releases-url`](configuration.md#uv-releases-url-and-python-build-standalone-releases-url).
 - **"no entrypoint" / "multiple [project.scripts] entries"** — see
   [entrypoint](configuration.md#entrypoint).
 - **A dependency has no wheel for a target platform** — every dependency

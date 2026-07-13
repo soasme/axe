@@ -204,6 +204,9 @@ resolution, download, or build failures.</p>
 <li><p><strong>Downloads fail or stall behind a corporate proxy</strong> — set
 <code class="docutils literal notranslate"><span class="pre">UV_NATIVE_TLS=1</span></code> so uv uses the system trust store, and run with <code class="docutils literal notranslate"><span class="pre">-v</span></code> to
 see the underlying tool output.</p></li>
+<li><p><strong>The build machine can’t reach github.com at all</strong> — point the uv and
+CPython downloads at an internal mirror with
+<a class="reference internal" href="configuration.html#uv-releases-url-and-python-build-standalone-releases-url"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">uv-releases-url</span></code> and <code class="docutils literal notranslate"><span class="pre">python-build-standalone-releases-url</span></code></span></a>.</p></li>
 <li><p><strong>“no entrypoint” / “multiple [project.scripts] entries”</strong> — see
 <a class="reference internal" href="configuration.html#entrypoint"><span class="std std-ref">entrypoint</span></a>.</p></li>
 <li><p><strong>A dependency has no wheel for a target platform</strong> — every dependency
