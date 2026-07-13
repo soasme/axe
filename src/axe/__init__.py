@@ -1,6 +1,6 @@
 """axe: ship Python apps as self-bootstrapping single-file binaries."""
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 # uv version embedded into built binaries. Bumped per axe release.
 DEFAULT_UV_VERSION = "0.10.6"
