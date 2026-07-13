@@ -78,6 +78,46 @@ expose = "all"
     assert set(config.expose) == {"python", "python-path", "cache", "metadata"}
 
 
+def test_releases_url_defaults(tmp_path):
+    config = load_config(
+        write_pyproject(
+            tmp_path,
+            """
+[project]
+name = "demo"
+version = "0.1.0"
+
+[project.scripts]
+demo = "demo:main"
+""",
+        )
+    )
+    assert config.uv_releases_url == "https://github.com/astral-sh/uv/releases/download"
+    assert config.python_build_standalone_releases_url == (
+        "https://github.com/astral-sh/python-build-standalone/releases/download"
+    )
+
+
+def test_releases_url_overrides_strip_trailing_slash(tmp_path):
+    config = load_config(
+        write_pyproject(
+            tmp_path,
+            """
+[project]
+name = "demo"
+version = "0.1.0"
+
+[tool.axe]
+entrypoint = "demo"
+uv-releases-url = "https://mirror.corp/uv/"
+python-build-standalone-releases-url = "https://mirror.corp/pbs"
+""",
+        )
+    )
+    assert config.uv_releases_url == "https://mirror.corp/uv"
+    assert config.python_build_standalone_releases_url == "https://mirror.corp/pbs"
+
+
 def test_no_entrypoint_errors(tmp_path):
     with pytest.raises(ConfigError, match="no entrypoint"):
         load_config(write_pyproject(tmp_path, '[project]\nname = "demo"\nversion = "0.1.0"\n'))

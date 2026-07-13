@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from . import DEFAULT_PYTHON_RELEASE, DEFAULT_PYTHON_VERSION, DEFAULT_UV_VERSION
+from .fetch import PBS_RELEASES, UV_RELEASES
 
 EXPOSABLE_COMMANDS = ("python", "python-path", "cache", "metadata")
 
@@ -33,6 +34,8 @@ class BuildConfig:
     python_version: str
     uv_version: str = DEFAULT_UV_VERSION
     python_release: str = DEFAULT_PYTHON_RELEASE
+    uv_releases_url: str = UV_RELEASES
+    python_build_standalone_releases_url: str = PBS_RELEASES
     expose: list[str] = field(default_factory=list)
     self_command_group: bool = True
 
@@ -139,6 +142,10 @@ def load_config(project_dir: Path) -> BuildConfig:
         python_version=python_version,
         uv_version=str(axe.get("uv-version", DEFAULT_UV_VERSION)),
         python_release=str(axe.get("python-release", DEFAULT_PYTHON_RELEASE)),
+        uv_releases_url=str(axe.get("uv-releases-url", UV_RELEASES)).rstrip("/"),
+        python_build_standalone_releases_url=str(
+            axe.get("python-build-standalone-releases-url", PBS_RELEASES)
+        ).rstrip("/"),
         expose=list(expose),
         self_command_group=self_command_group,
     )

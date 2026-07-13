@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Enhancements
+
+- Add `[tool.axe]` `uv-releases-url` and
+  `python-build-standalone-releases-url` to download the embedded uv and
+  CPython from a mirror instead of github.com (for network-isolated build
+  machines behind a proxy). HTTP Basic credentials for the mirror can be
+  supplied via `UV_RELEASES_USERNAME`/`UV_RELEASES_PASSWORD` and
+  `PYTHON_BUILD_STANDALONE_RELEASES_USERNAME`/`PYTHON_BUILD_STANDALONE_RELEASES_PASSWORD`
+
 ## 0.4.0
 
 ### Enhancements

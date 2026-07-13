@@ -10,6 +10,8 @@ entrypoint = "mycli"          # default: the sole [project.scripts] entry
 python = "3.12"               # default: lower bound of requires-python
 uv-version = "0.10.6"         # uv embedded into the binary
 python-release = "20260623"   # python-build-standalone release tag
+uv-releases-url = "https://mirror.corp/uv"    # mirror for uv downloads
+python-build-standalone-releases-url = "https://mirror.corp/pbs"  # ...and CPython
 expose = ["metadata"]         # extra `self` commands, or "all"
 self-command-group = true     # false: don't reserve `self` at all
 ```
@@ -67,6 +69,44 @@ The [python-build-standalone](https://github.com/astral-sh/python-build-standalo
 release tag that provides the embedded CPython.
 
 **Default:** pinned per axe release (currently 20260623).
+
+## `uv-releases-url` and `python-build-standalone-releases-url`
+
+Where `axe build` downloads the uv and CPython
+(python-build-standalone) release artifacts it embeds. Point these at an
+internal mirror when the build machine can't reach github.com — a
+network-isolated environment behind a proxy, an artifact repository like
+Artifactory or Nexus, or a plain file server.
+
+```toml
+[tool.axe]
+uv-releases-url = "https://mirror.corp/astral-sh/uv/releases/download"
+python-build-standalone-releases-url = "https://mirror.corp/astral-sh/python-build-standalone/releases/download"
+```
+
+The mirror must serve the same layout as the GitHub release download URLs;
+axe appends `/<release tag>/<artifact filename>` (plus `.sha256` and
+`SHA256SUMS` checksum files) to the configured base. Downloads stay
+checksum-verified, so a tampered mirror fails the build.
+
+**Defaults:**
+
+- `https://github.com/astral-sh/uv/releases/download`
+- `https://github.com/astral-sh/python-build-standalone/releases/download`
+
+### Mirror credentials
+
+If the mirror requires HTTP Basic authentication, set credentials as
+environment variables on the build machine (never in `pyproject.toml`,
+where they would be committed):
+
+| Variable | Applies to |
+| --- | --- |
+| `UV_RELEASES_USERNAME` / `UV_RELEASES_PASSWORD` | `uv-releases-url` downloads |
+| `PYTHON_BUILD_STANDALONE_RELEASES_USERNAME` / `PYTHON_BUILD_STANDALONE_RELEASES_PASSWORD` | `python-build-standalone-releases-url` downloads |
+
+For token-based mirrors that ignore the username, setting just the
+password variable works (an empty username is sent).
 
 ## `expose`
 

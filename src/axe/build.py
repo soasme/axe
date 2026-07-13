@@ -96,10 +96,16 @@ def build(
         for (goos, goarch), stub in stubs.items():
             target = f"{goos}/{goarch}"
             python_version, python_artifact = resolve_python(
-                config.python_version, config.python_release, goos, goarch
+                config.python_version,
+                config.python_release,
+                goos,
+                goarch,
+                config.python_build_standalone_releases_url,
             )
-            python_path = fetch_python(python_artifact, config.python_release)
-            uv_path = fetch_uv(config.uv_version, goos, goarch)
+            python_path = fetch_python(
+                python_artifact, config.python_release, config.python_build_standalone_releases_url
+            )
+            uv_path = fetch_uv(config.uv_version, goos, goarch, config.uv_releases_url)
 
             output.progress(f"{target}: resolving dependencies...")
             requirements = compile_requirements(uv, project_dir, goos, goarch, python_version)

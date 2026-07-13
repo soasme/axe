@@ -72,7 +72,7 @@ SUMS = {
 
 
 def test_resolve_python(monkeypatch):
-    monkeypatch.setattr(fetch, "_pbs_checksums", lambda release: SUMS)
+    monkeypatch.setattr(fetch, "_pbs_checksums", lambda release, releases_url=None: SUMS)
 
     # Minor pin resolves to the newest patch; stripped preferred when present.
     version, artifact = fetch.resolve_python("3.12", "20260623", "darwin", "arm64")
