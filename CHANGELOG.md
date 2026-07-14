@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.5.1
+
+### Bug fixes
+
+- Honor uv's index environment variables in the dependency download step:
+  `UV_INDEX_URL`/`UV_DEFAULT_INDEX` and `UV_EXTRA_INDEX_URL` are mirrored
+  into `PIP_INDEX_URL` and `PIP_EXTRA_INDEX_URL` (explicitly set `PIP_*`
+  variables win). Previously a build steered at a private index resolved
+  against it but downloaded wheels from pypi.org
+
+### Documentation
+
+- Document how `UV_*` environment variables steer `axe build` in the
+  configuration reference (built binaries still ignore them at runtime)
+
 ## 0.5.0
 
 ### Enhancements

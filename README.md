@@ -121,6 +121,10 @@ $ axe platforms
 of the underlying tools (useful behind corporate proxies — if downloads fail
 or stall there, set `UV_NATIVE_TLS=1` so uv uses the system trust store).
 
+`axe build` honors uv's `UV_*` environment variables — e.g. `UV_INDEX_URL`
+to resolve and download dependencies from a private index; see the
+[configuration reference](docs/reference/configuration.md) for details.
+
 Targets: `linux/amd64`, `linux/arm64`, `darwin/amd64`, `darwin/arm64`,
 `windows/amd64`.
 
