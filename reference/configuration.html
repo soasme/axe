@@ -99,6 +99,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#mirror-credentials">Mirror credentials</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#steering-uv-with-uv-environment-variables">Steering uv with <code class="docutils literal notranslate"><span class="pre">UV_*</span></code> environment variables</a></li>
 <li><a class="reference internal" href="#expose"><code class="docutils literal notranslate"><span class="pre">expose</span></code></a></li>
 <li><a class="reference internal" href="#self-command-group"><code class="docutils literal notranslate"><span class="pre">self-command-group</span></code></a></li>
 </ul>
@@ -266,6 +267,26 @@ where they would be committed):</p>
 <p>For token-based mirrors that ignore the username, setting just the
 password variable works (an empty username is sent).</p>
 </section>
+</section>
+<section id="steering-uv-with-uv-environment-variables">
+<h2>Steering uv with <code class="docutils literal notranslate"><span class="pre">UV_*</span></code> environment variables<a class="headerlink" href="#steering-uv-with-uv-environment-variables" title="Link to this heading">#</a></h2>
+<p>The tools <code class="docutils literal notranslate"><span class="pre">axe</span> <span class="pre">build</span></code> runs on the build machine — <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">build</span></code>,
+<code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">pip</span> <span class="pre">compile</span></code>, and <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">download</span></code> — inherit your environment, so
+<a class="reference external" href="https://docs.astral.sh/uv/reference/environment/">uv’s environment variables</a>
+steer the build. Common uses:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">UV_INDEX_URL</span></code> / <code class="docutils literal notranslate"><span class="pre">UV_DEFAULT_INDEX</span></code> / <code class="docutils literal notranslate"><span class="pre">UV_EXTRA_INDEX_URL</span></code> — resolve and
+download dependencies from a private index instead of pypi.org.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UV_NATIVE_TLS=1</span></code> — use the system trust store behind a
+TLS-intercepting corporate proxy.</p></li>
+</ul>
+<p>The dependency wheels are downloaded with pip, which ignores <code class="docutils literal notranslate"><span class="pre">UV_*</span></code>;
+axe mirrors the index variables above into <code class="docutils literal notranslate"><span class="pre">PIP_INDEX_URL</span></code> /
+<code class="docutils literal notranslate"><span class="pre">PIP_EXTRA_INDEX_URL</span></code> so the download step hits the same indexes
+resolution did. Explicitly set <code class="docutils literal notranslate"><span class="pre">PIP_*</span></code> variables take precedence.</p>
+<p>This applies to the build machine only: built binaries deliberately
+<a class="reference internal" href="runtime.html#environment-variables"><span class="std std-ref">ignore <code class="docutils literal notranslate"><span class="pre">UV_*</span></code> and <code class="docutils literal notranslate"><span class="pre">PIP_*</span></code></span></a> on the end user’s
+machine so every installation behaves identically.</p>
 </section>
 <section id="expose">
 <h2><code class="docutils literal notranslate"><span class="pre">expose</span></code><a class="headerlink" href="#expose" title="Link to this heading">#</a></h2>
