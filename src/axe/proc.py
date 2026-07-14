@@ -30,8 +30,11 @@ def run_tool(
     timeout: float,
     cwd: Path | None = None,
     hint: str = "",
+    env: dict[str, str] | None = None,
 ) -> str:
-    """Run a tool and return its stdout."""
+    """Run a tool and return its stdout. The build machine's environment is
+    inherited (env=None) so UV_*/PIP_* variables steer uv and pip; pass env
+    to substitute a modified copy."""
     if output.verbose():
         output.progress(f"$ {' '.join(str(c) for c in cmd)}")
     stderr = None if output.verbose() else subprocess.PIPE
@@ -43,6 +46,7 @@ def run_tool(
             stderr=stderr,
             text=True,
             timeout=timeout,
+            env=env,
         )
     except subprocess.TimeoutExpired:
         raise ToolError(
