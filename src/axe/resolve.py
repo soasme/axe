@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import tempfile
 from pathlib import Path
 
@@ -37,6 +38,24 @@ def compile_requirements(uv: str, project_dir: Path, goos: str, goarch: str, pyt
         cwd=project_dir,
         hint=NETWORK_HINT,
     )
+
+
+def pip_env() -> dict[str, str] | None:
+    """Environment for the pip download step, or None to inherit as-is.
+
+    pip ignores uv's UV_* variables, so a developer who points uv at a
+    private index (UV_INDEX_URL / UV_DEFAULT_INDEX / UV_EXTRA_INDEX_URL)
+    would resolve against it but download from pypi.org. Mirror those into
+    pip's PIP_* equivalents; explicitly set PIP_* variables win.
+    """
+    mapped = {
+        "PIP_INDEX_URL": os.environ.get("UV_INDEX_URL") or os.environ.get("UV_DEFAULT_INDEX"),
+        "PIP_EXTRA_INDEX_URL": os.environ.get("UV_EXTRA_INDEX_URL"),
+    }
+    mapped = {k: v for k, v in mapped.items() if v and k not in os.environ}
+    if not mapped:
+        return None
+    return {**os.environ, **mapped}
 
 
 def pinned_count(requirements: str) -> int:
@@ -98,6 +117,7 @@ def download_wheels(
             what=f"downloading dependency wheels for {goos}/{goarch}",
             timeout=DOWNLOAD_TIMEOUT,
             hint=("A dependency may not publish wheels for that platform. " + NETWORK_HINT),
+            env=pip_env(),
         )
     finally:
         Path(reqs_path).unlink(missing_ok=True)

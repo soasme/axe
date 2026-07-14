@@ -111,6 +111,27 @@ where they would be committed):
 For token-based mirrors that ignore the username, setting just the
 password variable works (an empty username is sent).
 
+## Steering uv with `UV_*` environment variables
+
+The tools `axe build` runs on the build machine — `uv build`,
+`uv pip compile`, and `pip download` — inherit your environment, so
+[uv's environment variables](https://docs.astral.sh/uv/reference/environment/)
+steer the build. Common uses:
+
+- `UV_INDEX_URL` / `UV_DEFAULT_INDEX` / `UV_EXTRA_INDEX_URL` — resolve and
+  download dependencies from a private index instead of pypi.org.
+- `UV_NATIVE_TLS=1` — use the system trust store behind a
+  TLS-intercepting corporate proxy.
+
+The dependency wheels are downloaded with pip, which ignores `UV_*`;
+axe mirrors the index variables above into `PIP_INDEX_URL` /
+`PIP_EXTRA_INDEX_URL` so the download step hits the same indexes
+resolution did. Explicitly set `PIP_*` variables take precedence.
+
+This applies to the build machine only: built binaries deliberately
+[ignore `UV_*` and `PIP_*`](runtime.md#environment-variables) on the end user's
+machine so every installation behaves identically.
+
 ## `expose`
 
 Extra `self` management commands compiled into the binary, beyond the
